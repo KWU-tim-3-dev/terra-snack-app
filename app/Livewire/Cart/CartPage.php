@@ -45,6 +45,7 @@ class CartPage extends Component
             $this->cart->load(['items.product', 'items.optionValues']);
         }
     }
+    
     public function calculateTotals()
     {
         if (!$this->cart || !$this->cart->relationLoaded('items')) {
@@ -65,7 +66,6 @@ class CartPage extends Component
 
     public function render()
     {
-        return view('livewire.cart.cart-page')
-            ->layout('components.layouts.customer');
+        return view('livewire.cart.cart-page');
     }
 }
