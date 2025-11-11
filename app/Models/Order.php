@@ -38,4 +38,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function getTotalAttribute(): float
+    {
+        return $this->items->sum('subtotal');
+    }
 }

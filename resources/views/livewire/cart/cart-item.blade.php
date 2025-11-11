@@ -1,6 +1,6 @@
 <div class="bg-white p-4 rounded-2xl shadow-lg flex flex-col items-center relative">
     
-    <button 
+    <button
         wire:click="removeItem" 
         wire:loading.attr="disabled"
         wire:target="removeItem"
@@ -11,10 +11,10 @@
     </button>
 
     @if ($cartItem->product)
-    <img src="{{ $cartItem->product->image_url ?? 'https://placehold.co/300x300/e2e8f0/e2e8f0?text=Image' }}" 
-         alt="{{ $cartItem->product->name ?? 'Produk' }}" 
+    <img src="{{ $cartItem->product->image_url ?? asset('https://placehold.co/300x300/e2e8f0/e2e8f0?text=Image') }}"
+         alt="{{ $cartItem->product->name ?? 'Produk' }}"
          class="w-full h-24 object-contain mb-3"
-         onerror="this.src='https://placehold.co/300x300/e2e8f0/e2e8f0?text=Image';">
+         onerror="this.src='https://placehold.co/300x300/e2e8f0/e2e8f0?text=Image'">
     @endif
 
     <h3 class="font-bold text-lg text-gray-900 text-center mb-1">
@@ -23,7 +23,7 @@
 
     <div class="text-center mb-3 min-h-[30px]"> 
         <p class="text-xs text-gray-500 leading-tight">
-            Rincian : 
+            Rincian :
             @if ($cartItem->optionValues->isNotEmpty())
                 {{ $cartItem->optionValues->pluck('name')->join(', ') }}
             @else

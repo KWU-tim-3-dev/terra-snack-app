@@ -4,7 +4,12 @@ use App\Http\Controllers\ProfileController;
 use App\Livewire\Cart\CartPage;
 use App\Livewire\Products\ProductList;
 use App\Livewire\Products\ProductCustomize;
+use App\Livewire\Orders\CheckoutPage;
+use App\Livewire\Orders\OrderHistory;
+use App\Models\Order;
 use Illuminate\Support\Facades\Route;
+
+use function Termwind\render;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,3 +37,11 @@ Route::get('/products', ProductList::class)
 Route::get('/products/{product}/customize', ProductCustomize::class)
     ->middleware('web')
     ->name('product.customize');
+
+Route::get('/orders/{order}/checkout', CheckoutPage::class)
+    ->middleware('web')
+    ->name('orders.checkout');
+
+Route::get('/orders/history', OrderHistory::class)
+    ->middleware('web')
+    ->name('orders.history');

@@ -35,7 +35,7 @@
         </div>
 
         <div>
-            <a href="#"
+            <a href="{{ route('orders.checkout', ['order' => $cart->id]) }}" wire:navigate
                 class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
                 Lanjutkan Ke Pembayaran
             </a>

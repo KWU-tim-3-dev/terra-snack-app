@@ -8,6 +8,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use BackedEnum;
+use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
 
 
@@ -17,6 +18,25 @@ class CustomerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
+    public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Nama')
+                    ->required(),
+                TextInput::make('email')
+                    ->label('Email')
+                    ->email()
+                    ->required(),
+                TextInput::make('phone')
+                    ->label('Telepon')
+                    ->required(),
+                TextInput::make('address')
+                    ->label('Alamat')
+                    ->required(),
+            ]);
+    }
 
     public static function table(Table $table): Table
     {

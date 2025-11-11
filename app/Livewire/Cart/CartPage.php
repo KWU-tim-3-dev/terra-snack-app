@@ -4,11 +4,11 @@ namespace App\Livewire\Cart;
 
 use App\Models\Cart;
 use App\Models\User;
-use Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Auth;
 
-#[Layout('components.layouts.customer')] 
+#[Layout('components.layouts.customer')]
 class CartPage extends Component
 {
     public Cart $cart;
@@ -20,7 +20,8 @@ class CartPage extends Component
 
     public function mount()
     {
-        $user = User::find(1);
+         $user = Auth::user() ?? User::find(1);
+
         if (!$user) {
             abort(404, 'Test user (ID 1) not found. Please run tinker to create User ID 1 and its cart.');
         }

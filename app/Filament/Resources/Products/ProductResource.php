@@ -63,7 +63,7 @@ class ProductResource extends Resource
                 Textarea::make('description')
                     ->default(null)
                     ->columnSpanFull(),
-                FileUpload::make('image_url'),
+                FileUpload::make('image_url')
 
             ]);
     }
