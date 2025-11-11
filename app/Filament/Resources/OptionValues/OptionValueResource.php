@@ -5,7 +5,6 @@ namespace App\Filament\Resources\OptionValues;
 use App\Filament\Resources\OptionValues\Pages\ManageOptionValues;
 use App\Models\OptionValue;
 use BackedEnum;
-use Dom\Text;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -18,7 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
 class OptionValueResource extends Resource
 {

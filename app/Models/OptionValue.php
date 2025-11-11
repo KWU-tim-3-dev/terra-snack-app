@@ -17,7 +17,7 @@ class OptionValue extends Model
 
     protected $casts = [
         'price_modifier' => 'decimal:2',
-         'details' => 'array',
+        'details' => 'array',
     ];
 
     public function customizationOption(): BelongsTo

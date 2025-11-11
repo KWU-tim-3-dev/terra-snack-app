@@ -14,7 +14,7 @@
     @if ($product->customizationOptions->isNotEmpty())
         <a href="{{ route('product.customize', $product) }}" wire:navigate
            class="mt-4 w-full bg-[#E13220] group-hover:bg-white group-hover:text-[#E13220] text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors text-center">
-           Tambahkan
+           Tambahkan(Custom)
         </a>
     @else
         <button wire:click="addToCart" wire:loading.attr="disabled"

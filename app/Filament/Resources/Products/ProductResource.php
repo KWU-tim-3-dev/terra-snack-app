@@ -9,6 +9,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -17,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -49,6 +51,15 @@ class ProductResource extends Resource
                     ->required()
                     ->numeric()
                     ->prefix('Rp.'),
+
+                Select::make('customizationOptions')
+                    ->label('Customization Options')
+                    ->multiple()
+                    ->preload()
+                    ->relationship('customizationOptions', 'name')
+                    ->placeholder('Pilih opsi kustomisasi...')
+                    ->helperText('Kamu bisa memilih lebih dari satu opsi.')
+                    ->searchable(),
                 Textarea::make('description')
                     ->default(null)
                     ->columnSpanFull(),
@@ -61,17 +72,23 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category.name')
+                TextColumn::make('category.name')
                     ->label('Kategori')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->label('Harga')
                     ->money('IDR')
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image_url')
+                TextColumn::make('customizationOptions')
+                    ->label('Opsi Kustomisasi')
+                    ->getStateUsing(function (Product $record) {
+                        return $record->customizationOptions->pluck('name')->join(', ');
+                    })
+                    ->wrap(),
+                ImageColumn::make('image_url')
                     ->label('Gambar')
                     ->size(70)
                     ->extraImgAttributes(['class' => 'object-cover']),
