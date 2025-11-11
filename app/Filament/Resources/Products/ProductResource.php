@@ -11,15 +11,14 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Support\Str;
 
 class ProductResource extends Resource
@@ -39,7 +38,7 @@ class ProductResource extends Resource
                     ->required()
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state, $set) {
-                        if (!empty($state)) {
+                        if (! empty($state)) {
                             $set('slug', Str::slug($state));
                         }
                     }),
@@ -53,7 +52,7 @@ class ProductResource extends Resource
                 Textarea::make('description')
                     ->default(null)
                     ->columnSpanFull(),
-                FileUpload::make('image_url')
+                FileUpload::make('image_url'),
 
             ]);
     }
@@ -74,7 +73,7 @@ class ProductResource extends Resource
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Gambar')
-                    ->size(70) 
+                    ->size(70)
                     ->extraImgAttributes(['class' => 'object-cover']),
                 TextColumn::make('created_at')
                     ->dateTime()
