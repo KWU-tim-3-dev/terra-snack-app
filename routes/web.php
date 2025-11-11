@@ -2,14 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Cart\CartPage;
-use App\Livewire\Products\ProductList;
-use App\Livewire\Products\ProductCustomize;
 use App\Livewire\Orders\CheckoutPage;
 use App\Livewire\Orders\OrderHistory;
-use App\Models\Order;
+use App\Livewire\Products\ProductCustomize;
+use App\Livewire\Products\ProductList;
 use Illuminate\Support\Facades\Route;
-
-use function Termwind\render;
 
 Route::get('/', function () {
     return view('welcome');
