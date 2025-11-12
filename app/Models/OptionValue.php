@@ -24,9 +24,4 @@ class OptionValue extends Model
     {
         return $this->belongsTo(CustomizationOption::class);
     }
-
-    public function orderItems(): BelongsToMany
-    {
-        return $this->belongsToMany(OrderItem::class, 'order_item_option_values');
-    }
 }

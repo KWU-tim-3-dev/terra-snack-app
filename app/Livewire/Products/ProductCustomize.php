@@ -139,65 +139,6 @@ class ProductCustomize extends Component
         }
     }
 
-    public function addToOrder()
-    {
-        $user = User::find(1);
-        if (!$user) {
-            abort(500, 'Test user not found.');
-        }
-        $order = $user->orders()->firstOrCreate(['user_id' => $user->id, 'status' => 'pending']);
-
-        $selectedOptionIds = [];
-        foreach ($this->selectedOptions as $groupId => $optionIds) {
-            if (is_array($optionIds)) {
-                $selectedOptionIds = array_merge($selectedOptionIds, $optionIds);
-            } elseif (!is_null($optionIds)) {
-                $selectedOptionIds[] = $optionIds;
-            }
-        }
-        sort($selectedOptionIds);
-
-        $optionsPrice = OptionValue::whereIn('id', $selectedOptionIds)->sum('price_modifier');
-        $unitPrice = $this->product->price + $optionsPrice;
-        $subtotal = $unitPrice * $this->quantity;
-
-        $existingItem = $order->items()
-            ->where('product_id', $this->product->id)
-            ->with('optionValues:id')
-            ->get()
-            ->first(function ($item) use ($selectedOptionIds) {
-                $itemOptionIds = $item->optionValues->pluck('id')->all();
-                sort($itemOptionIds);
-                return $itemOptionIds === $selectedOptionIds;
-            });
-
-        try {
-            if ($existingItem) {
-                $existingItem->increment('quantity', $this->quantity);
-                $newSubtotal = $existingItem->quantity * $unitPrice;
-                $existingItem->update(['subtotal' => $newSubtotal]);
-
-            } else {
-                $newItem = $order->items()->create([
-                    'order_id' => $order->id,
-                    'product_id' => $this->product->id,
-                    'product_name' => $this->product->name,
-                    'quantity' => $this->quantity,
-                    'unit_price' => $unitPrice,
-                    'subtotal' => $subtotal,
-                ]);
-
-                $newItem->optionValues()->attach($selectedOptionIds);
-            }
-
-            return redirect()->route('orders.checkout', ['order' => $order->id]);
-
-        } catch (\Exception $e) {
-            Log::error('Error adding custom item to order: ' . $e->getMessage());
-            $this->dispatch('show-error', 'Gagal menambahkan barang ke pesanan.');
-        }
-    }
-
     public function resetTopping($groupId)
     {
         $this->selectedOptions[$groupId] = null;

@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Cart\CartPage;
-use App\Livewire\Orders\CheckoutPage;
+use App\Livewire\Orders\OrderCustomizable;
+use App\Livewire\Orders\OrderPage;
 use App\Livewire\Orders\OrderHistory;
 use App\Livewire\Products\ProductCustomize;
 use App\Livewire\Products\ProductList;
+use App\Models\Order;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,9 +37,13 @@ Route::get('/products/{product}/customize', ProductCustomize::class)
     ->middleware('web')
     ->name('product.customize');
 
-Route::get('/orders/{order}/checkout', CheckoutPage::class)
+Route::get('/orders', OrderPage::class)
     ->middleware('web')
-    ->name('orders.checkout');
+    ->name('orders');
+
+Route::get('/order/{order}/details', OrderCustomizable::class)
+    ->middleware('web')
+    ->name('order.details');
 
 Route::get('/orders/history', OrderHistory::class)
     ->middleware('web')

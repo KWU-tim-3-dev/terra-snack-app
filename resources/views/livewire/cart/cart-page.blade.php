@@ -35,10 +35,17 @@
         </div>
 
         <div>
-            <a href="{{ route('orders.checkout', ['order' => $cart->id]) }}" wire:navigate
+            @if($cart && $cart->items->isNotEmpty())
+            <a href="{{ route('orders') }}" wire:navigate
                 class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
-                Lanjutkan Ke Pembayaran
+                Lanjutkan Ke Pembayaran(Isi)
             </a>
+            @else
+            <button disabled
+                class="block w-full text-sm text-center bg-gray-300 text-white font-semibold py-2 rounded-lg shadow-md cursor-not-allowed">
+                Lanjutkan Ke Pembayaran
+            </button>
+            @endif
 
             <a href="{{ route('products.list') }}" wire:navigate
                 class="block text-center text-gray-500 font-medium mt-3">

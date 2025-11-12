@@ -9,9 +9,7 @@
             <div class="rounded-lg p-4">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-xl font-semibold">{{ $group->name }}</h3>
-                    <button 
-                        wire:click="resetTopping({{ $group->id }})"
-                        type="button"
+                    <button wire:click="resetTopping({{ $group->id }})" type="button"
                         class="text-sm text-gray-500 hover:text-red-600 transition-colors">
                         Reset
                     </button>
@@ -31,9 +29,7 @@
                                         <span class="text-sm">Gratis</span>
                                     @endif
 
-                                    <input 
-                                        type="radio" 
-                                        class="sr-only peer" 
+                                    <input type="radio" class="sr-only peer"
                                         wire:model.live="selectedOptions.{{ $group->id }}"
                                         value="{{ $value->id }}">
                                     <span
@@ -73,7 +69,8 @@
         </div>
     </div>
 
-    <div class="fixed p-4 bottom-0 max-w-content mx-auto px-mobile-gutter left-0 right-0 w-full bg-white border-t-4 border-[#E13220] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+    <div
+        class="fixed p-4 bottom-0 max-w-content mx-auto px-mobile-gutter left-0 right-0 w-full bg-white border-t-4 border-[#E13220] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
         <div class="flex justify-between items-center mb-3">
             <span class="text-lg font-semibold">Total Pembayaran</span>
             <span class="text-2xl font-bold text-red-600">

@@ -17,6 +17,7 @@ class OrderItem extends Component
     {
         $this->orderItem = $orderItem;
         $this->quantity = $orderItem->quantity;
+
     }
 
     public function updateQuantity()
