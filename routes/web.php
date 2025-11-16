@@ -7,7 +7,7 @@ use App\Livewire\Orders\OrderPage;
 use App\Livewire\Orders\OrderHistory;
 use App\Livewire\Products\ProductCustomize;
 use App\Livewire\Products\ProductList;
-use App\Models\Order;
+use App\Livewire\Products\UserControll;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -48,3 +48,7 @@ Route::get('/order/{order}/details', OrderCustomizable::class)
 Route::get('/orders/history', OrderHistory::class)
     ->middleware('web')
     ->name('orders.history');
+
+Route::get('/getlogin', UserControll::class)
+    ->middleware('web')
+    ->name('get.login');

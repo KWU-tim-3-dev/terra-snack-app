@@ -12,7 +12,6 @@ use Log;
 class OrderCustomizable extends Component
 {
     public Order $order;
-    pub
     
     public function mount(Order $order)
     {

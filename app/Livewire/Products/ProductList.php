@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Products;
 
 use App\Models\Category;

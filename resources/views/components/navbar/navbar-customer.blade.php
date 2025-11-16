@@ -46,13 +46,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100">
+                    <a href="{{ route('orders.history') }}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100">
                         <i class="fa-solid fa-file-invoice text-[#E13220] w-6 text-center"></i>
                         <span>Riwayat Transaksi</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100">
+                    <a href="{{ route('get.login') }}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100">
                         <i class="fa-solid fa-user text-[#E13220] w-6 text-center"></i>
                         <span>Akun</span>
                     </a>
