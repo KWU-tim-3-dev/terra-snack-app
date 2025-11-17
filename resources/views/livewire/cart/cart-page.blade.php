@@ -20,8 +20,9 @@
         @endif
     </div>
 
+    {{-- Total Section --}}
     <div
-        class="fixed py-10 flex flex-col gap-8 bottom-0 max-w-content mx-auto px-mobile-gutter left-0 right-0 w-full bg-white border-t-4 border-[#E13220] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+        class="py-10 flex flex-col gap-8 bottom-0 max-w-content mx-auto px-mobile-gutter left-0 right-0 w-full bg-white border-t-4 border-[#E13220] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
 
         <div>
             <div class="flex justify-between items-center text-xs  text-gray-700 mb-2">
@@ -40,6 +41,10 @@
                 class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
                 Lanjutkan Ke Pembayaran(Isi)
             </a>
+             <button wire:click="addToCart" wire:loading.attr="disabled"
+            class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
+            Tambahkan ke keranjang
+        </button>
             @else
             <button disabled
                 class="block w-full text-sm text-center bg-gray-300 text-white font-semibold py-2 rounded-lg shadow-md cursor-not-allowed">

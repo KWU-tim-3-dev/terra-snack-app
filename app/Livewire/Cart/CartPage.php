@@ -23,7 +23,7 @@ class CartPage extends Component
 
     public function mount()
     {
-        $user = Auth::user() ?? User::find(1);
+        $user = Auth::user();
 
         if (! $user) {
             abort(404, 'User tidak ditemukan. Untuk testing, buat User ID 1.');
@@ -38,7 +38,7 @@ class CartPage extends Component
 
     protected function addCartToOrder()
     {
-        $user = Auth::user() ?? User::find(1);
+        $user = Auth::user();
         if (! $user) {
             abort(404, 'User tidak ditemukan.');
         }
@@ -58,7 +58,7 @@ class CartPage extends Component
 
     protected function createNewOrder()
     {
-        $user = Auth::user() ?? User::find(1);
+        $user = Auth::user();
         $user->orders()->create([
             'total_price' => 0.00,
             'payment_status' => 'unpaid',
@@ -67,7 +67,7 @@ class CartPage extends Component
 
     protected function insertCartItemsToOrder()
     {
-        $user = Auth::user() ?? User::find(1);
+        $user = Auth::user();
         $order = $user->orders()->latest()->first();
 
         foreach ($this->cart->items as $cartItem) {
@@ -83,7 +83,7 @@ class CartPage extends Component
 
     public function clearCart()
     {
-        $user = Auth::user() ?? User::find(1);
+        $user = Auth::user();
         $user->cart->items()->delete();
     }
 

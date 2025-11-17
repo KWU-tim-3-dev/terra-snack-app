@@ -11,9 +11,6 @@ class CustomizationOption extends Model
     protected $fillable = [
         'name',
         'type', 
-        'order', 
-        'is_required',
-        'multiple_selection'
     ];
 
     public function products(): BelongsToMany

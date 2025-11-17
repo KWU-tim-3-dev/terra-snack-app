@@ -30,7 +30,7 @@ class OrderPage extends Component
             abort(404, 'User tidak ditemukan. Untuk testing, buat User ID 1.');
         }
 
-        $this->addCartToOrder($user);
+        // $this->addCartToOrder($user);
         // $this->clearCart($user);
         $this->loadOrderDetails();
         $this->calculateTotals();
@@ -51,27 +51,27 @@ class OrderPage extends Component
         $this->calculateTotals();
     }
 
-    protected function addCartToOrder(User $user)
-    {
-        $this->createOrderFromCart($user);
-        $cart = $user->cart()->with('items')->first();
+    // protected function addCartToOrder(User $user)
+    // {
+    //     $this->createOrderFromCart($user);
+    //     $cart = $user->cart()->with('items')->first();
 
-        if ($cart && $cart->items->isNotEmpty()) {
-            foreach ($cart->items as $cartItem) {
-                $this->order->items()->updateOrCreate(
-                    [
-                        'product_id' => $cartItem->product_id,
-                    ],
-                    [
-                        'product_name' => $cartItem->product->name,
-                        'quantity' => $cartItem->quantity,
-                        'unit_price' => $cartItem->product->price,
-                        'subtotal' => $cartItem->subtotal,
-                    ]
-                );
-            }
-        }
-    }
+    //     if ($cart && $cart->items->isNotEmpty()) {
+    //         foreach ($cart->items as $cartItem) {
+    //             $this->order->items()->updateOrCreate(
+    //                 [
+    //                     'product_id' => $cartItem->product_id,
+    //                 ],
+    //                 [
+    //                     'product_name' => $cartItem->product->name,
+    //                     'quantity' => $cartItem->quantity,
+    //                     'unit_price' => $cartItem->product->price,
+    //                     'subtotal' => $cartItem->subtotal,
+    //                 ]
+    //             );
+    //         }
+    //     }
+    // }
 
     protected function clearCart(User $user)
     {

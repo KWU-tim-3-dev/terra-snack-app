@@ -4,7 +4,6 @@ namespace App\Livewire\Products;
 
 use App\Models\OptionValue;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -121,6 +120,9 @@ class ProductCustomize extends Component
                 $newSubtotal = $existingItem->quantity * $unitPrice;
                 $existingItem->update(['subtotal' => $newSubtotal]);
 
+                $existingItem->optionValues()->sync($selectedOptionIds);
+
+                $this->dispatch('show-success', 'Barang diperbarui di keranjang!');
             } else {
                 $newItem = $cart->items()->create([
                     'product_id' => $this->product->id,
@@ -130,6 +132,7 @@ class ProductCustomize extends Component
                 ]);
 
                 $newItem->optionValues()->attach($selectedOptionIds);
+                $this->dispatch('show-success', 'Barang ditambahkan ke keranjang!');
             }
 
             return redirect()->route('cart');
