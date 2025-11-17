@@ -20,7 +20,7 @@ class UserControll extends Component
 
         // session()->flash('success', $user->name . ' berhasil masuk.');
         
-        // $this->dispatch('productAdded', 'Barang ditambahkan ke keranjang!');
+        $this->dispatch('message', 'User Terdeteksi: '. $user->name . ' (ID: ' . $user->id . ')');
 
         return view('livewire.products.view', [
             'user' => $user,

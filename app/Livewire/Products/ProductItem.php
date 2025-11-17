@@ -21,10 +21,8 @@ class ProductItem extends Component
 
     public function addToCart()
     {
-        $user = Auth::user() ?? User::find(1);
-        if (!$user) {
-            abort(500, 'Test user not found.');
-        }
+        $user = Auth::user();
+
         // $user = Auth::user();
         // if (!$user) {
         //     return redirect()->route('login');
@@ -52,7 +50,7 @@ class ProductItem extends Component
                 ]);
             }
 
-            $this->dispatch('productAdded', 'Barang ditambahkan ke keranjang!');
+            $this->dispatch('show-success', 'Barang ditambahkan ke keranjang!');
 
         } catch (\Exception $e) {
             Log::error('Error adding to cart: ' . $e->getMessage());
@@ -89,7 +87,7 @@ class ProductItem extends Component
                 ]);
             }
 
-            $this->dispatch('productAddedToOrder', 'Barang ditambahkan ke pesanan!');
+            $this->dispatch('show-success', 'Barang ditambahkan ke pesanan!');
 
         } catch (\Exception $e) {
             Log::error('Error adding to order: ' . $e->getMessage());

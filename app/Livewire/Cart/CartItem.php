@@ -30,7 +30,7 @@ class CartItem extends Component
                 'quantity' => $this->quantity,
                 'subtotal' => $newSubtotal,
             ]);
-            $this->dispatch('cartUpdated');
+            $this->dispatch('show-success', 'Jumlah barang diperbarui.');
         } catch (\Exception $e) {
             Log::error('Error updating cart item quantity: ' . $e->getMessage());
             $this->dispatch('show-error', 'Gagal memperbarui jumlah barang.');
