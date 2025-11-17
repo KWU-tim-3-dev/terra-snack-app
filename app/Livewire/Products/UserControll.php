@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 
 #[Layout('components.layouts.customer')]
 class UserControll extends Component
-{    
+{   
+    
     public function render()
     {
         $user = Auth::user();

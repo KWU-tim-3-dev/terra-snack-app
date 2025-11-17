@@ -10,6 +10,8 @@
             <p>role : {{ $user->role }}</p>
             <p>created_at : {{ $user->created_at }}</p>
             <p>updated_at : {{ $user->updated_at }}</p>
+        @else
+            <p>No Active User</p>
         @endif
     </div>
 </div>

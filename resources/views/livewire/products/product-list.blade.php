@@ -33,4 +33,5 @@
             <p class="col-span-2 text-center text-gray-500">Tidak ada produk di kategori ini.</p>
         @endif
     </div>
+
 </div>
