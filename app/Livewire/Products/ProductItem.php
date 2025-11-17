@@ -4,6 +4,7 @@ namespace App\Livewire\Products;
 
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Log;
@@ -20,7 +21,7 @@ class ProductItem extends Component
 
     public function addToCart()
     {
-        $user = User::find(1);
+        $user = Auth::user() ?? User::find(1);
         if (!$user) {
             abort(500, 'Test user not found.');
         }

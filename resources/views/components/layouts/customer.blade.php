@@ -21,8 +21,45 @@
     </main>
 
     {{-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
     @livewireScripts
+
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Ups!',
+                text: '{{ session('error') }}',
+                showConfirmButton: true
+            });
+        </script>
+    @endif
+
+    <script>
+        Livewire.on('productAdded', (message) => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: message,
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -77,6 +77,7 @@
                 Rp {{ number_format($currentTotalPrice, 0, ',', '.') }}
             </span>
         </div>
+        
         <button wire:click="addToCart" wire:loading.attr="disabled"
             class="w-full bg-red-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-red-700 transition-colors">
             Tambahkan ke keranjang
