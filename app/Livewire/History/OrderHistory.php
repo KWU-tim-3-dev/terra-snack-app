@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Livewire\Orders;
+namespace App\Livewire\History;
 
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -14,7 +15,10 @@ class OrderHistory extends Component
 
     public function mount()
     {
-        $user = User::find(1);
+        $user = Auth::user();
+
+        $this->dispatch('message', 'User Terdeteksi: '. $user->name . ' (ID: ' . $user->id . ')');
+
         if (!$user) {
             abort(404, 'Test user (ID 1) not found. Please run tinker to create User ID 1 and its orders.');
         }
@@ -24,7 +28,7 @@ class OrderHistory extends Component
 
     public function render()
     {
-        return view('livewire.orders.order-history', [
+        return view('livewire.history.order-history', [
             'orders' => $this->orders,
         ]);
     }

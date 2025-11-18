@@ -36,20 +36,20 @@
         </div>
 
         <div>
-            @if($cart && $cart->items->isNotEmpty())
-            <a href="{{ route('orders') }}" wire:navigate
-                class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
-                Lanjutkan Ke Pembayaran(Isi)
-            </a>
-             <button wire:click="addToCart" wire:loading.attr="disabled"
-            class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
-            Tambahkan ke keranjang
-        </button>
+            @if ($cart && $cart->items->isNotEmpty())
+                {{-- <a href="{{ route('orders') }}" wire:navigate
+                    class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
+                    Lanjutkan Ke Pembayaran(Isi)
+                </a> --}}
+                <button wire:click="addCartToOrder" wire:loading.attr="disabled"
+                    class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
+                    Lanjutkan Ke Pembayaran(Isi)
+                </button>
             @else
-            <button disabled
-                class="block w-full text-sm text-center bg-gray-300 text-white font-semibold py-2 rounded-lg shadow-md cursor-not-allowed">
-                Lanjutkan Ke Pembayaran
-            </button>
+                <button disabled
+                    class="block w-full text-sm text-center bg-gray-300 text-white font-semibold py-2 rounded-lg shadow-md cursor-not-allowed">
+                    Lanjutkan Ke Pembayaran
+                </button>
             @endif
 
             <a href="{{ route('products.list') }}" wire:navigate

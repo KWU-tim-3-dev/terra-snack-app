@@ -30,7 +30,6 @@
     {{-- ORDER ITEMS --}}
     <div>
         @if ($order && $order->items->isNotEmpty())
-            <p>Ada isinya</p>
             @foreach ($order->items as $item)
                 <livewire:orders.order-item :orderItem="$item" :key="$item->id" />
             @endforeach
@@ -40,7 +39,7 @@
     </div>
 
     <div
-        class="fixed py-10 flex flex-col gap-8 bottom-0 max-w-content mx-auto px-mobile-gutter left-0 right-0 w-full bg-white border-t-4 border-[#E13220] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+        class="py-10 flex flex-col gap-8 bottom-0 max-w-content mx-auto px-mobile-gutter left-0 right-0 w-full bg-white border-t-4 border-[#E13220] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
 
         <div>
             <div class="flex justify-between items-center text-xs  text-black mb-4">

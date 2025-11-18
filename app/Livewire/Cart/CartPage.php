@@ -3,7 +3,9 @@
 namespace App\Livewire\Cart;
 
 use App\Models\Cart;
-use App\Models\User;
+use App\Models\OptionValue;
+use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,6 +14,10 @@ use Livewire\Component;
 class CartPage extends Component
 {
     public Cart $cart;
+
+    public Product $product;
+
+    public array $selectedOptions = [];
 
     protected $listeners = ['cartUpdated' => 'refreshCart'];
 
@@ -25,6 +31,8 @@ class CartPage extends Component
     {
         $user = Auth::user();
 
+        $this->dispatch('message', 'User Terdeteksi: '.$user->name.' (ID: '.$user->id.')');
+
         if (! $user) {
             abort(404, 'User tidak ditemukan. Untuk testing, buat User ID 1.');
         }
@@ -36,24 +44,52 @@ class CartPage extends Component
         $this->calculateTotals();
     }
 
-    protected function addCartToOrder()
+    public function addCartToOrder()
     {
         $user = Auth::user();
+
         if (! $user) {
             abort(404, 'User tidak ditemukan.');
         }
 
-        if (! $this->cart || $this->cart->items->isEmpty()) {
+        if ($this->cart->items->isEmpty()) {
             session()->flash('error', 'Keranjang kamu kosong.');
 
-        } else {
-            $this->createNewOrder();
-            $this->insertCartItemsToOrder();
-            // $this->clearCart();
-            $this->refreshCart();
-            session()->flash('success', 'Berhasil menambahkan pesanan dari keranjang.');
+            return;
         }
 
+        // 1. Buat order baru DAN simpan instance-nya
+        $order = $user->orders()->create([
+            'total_price' => 0,
+            'payment_status' => 'unpaid',
+        ]);
+
+        // 2. Pindahkan semua cartItems -> orderItems
+        foreach ($this->cart->items as $cartItem) {
+
+            $newOrderItem = $order->items()->create([
+                'product_id' => $cartItem->product_id,
+                'product_name' => $cartItem->product->name,
+                'quantity' => $cartItem->quantity,
+                'unit_price' => $cartItem->unit_price,
+                'subtotal' => $cartItem->subtotal,
+            ]);
+
+            // 3. Pindahkan OPTION VALUES juga
+            if ($cartItem->optionValues->isNotEmpty()) {
+                $newOrderItem->optionValues()->attach(
+                    $cartItem->optionValues->pluck('id')->toArray()
+                );
+            }
+        }
+
+        // 4. Bersihkan cart
+        $this->clearCart();
+
+        // 5. Refresh
+        $this->refreshCart();
+
+        session()->flash('success', 'Berhasil menambahkan pesanan dari keranjang.');
     }
 
     protected function createNewOrder()

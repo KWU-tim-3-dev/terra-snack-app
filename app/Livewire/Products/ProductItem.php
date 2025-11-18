@@ -23,10 +23,10 @@ class ProductItem extends Component
     {
         $user = Auth::user();
 
-        // $user = Auth::user();
-        // if (!$user) {
-        //     return redirect()->route('login');
-        // }
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
 
         try {
             $cart = $user->cart()->firstOrCreate(['user_id' => $user->id]);

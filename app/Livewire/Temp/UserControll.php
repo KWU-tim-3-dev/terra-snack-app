@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Products;
+namespace App\Livewire\Temp;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +22,7 @@ class UserControll extends Component
         
         $this->dispatch('message', 'User Terdeteksi: '. $user->name . ' (ID: ' . $user->id . ')');
 
-        return view('livewire.products.view', [
+        return view('livewire.temp.view', [
             'user' => $user,
         ]);
     }

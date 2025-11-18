@@ -4,10 +4,11 @@ use App\Http\Controllers\ProfileController;
 use App\Livewire\Cart\CartPage;
 use App\Livewire\Orders\OrderCustomizable;
 use App\Livewire\Orders\OrderPage;
-use App\Livewire\Orders\OrderHistory;
+use App\Livewire\History\OrderHistory;
+use App\Livewire\History\OrderHistoryPage;
 use App\Livewire\Products\ProductCustomize;
 use App\Livewire\Products\ProductList;
-use App\Livewire\Products\UserControll;
+use App\Livewire\Temp\UserControll;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -41,11 +42,15 @@ Route::get('/orders', OrderPage::class)
     ->middleware('web')
     ->name('orders');
 
-Route::get('/order/{order}/details', OrderCustomizable::class)
+Route::get('/order/{order}/details', OrderPage::class)
     ->middleware('web')
     ->name('order.details');
 
-Route::get('/orders/history', OrderHistory::class)
+Route::get('/checkout', OrderHistory::class)
+    ->middleware('web')
+    ->name('checkout');
+
+Route::get('/orders/history', OrderHistoryPage::class)
     ->middleware('web')
     ->name('orders.history');
 

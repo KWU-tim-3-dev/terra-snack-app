@@ -3,7 +3,6 @@
 namespace App\Livewire\Cart;
 
 use Livewire\Component;
-use Log;
 use Livewire\Attributes\Layout;
 use App\Models\CartItem as CartItemModel;
 
@@ -32,7 +31,6 @@ class CartItem extends Component
             ]);
             $this->dispatch('show-success', 'Jumlah barang diperbarui.');
         } catch (\Exception $e) {
-            Log::error('Error updating cart item quantity: ' . $e->getMessage());
             $this->dispatch('show-error', 'Gagal memperbarui jumlah barang.');
         }
     }
@@ -58,7 +56,6 @@ class CartItem extends Component
             $this->dispatch('cartUpdated');
             $this->dispatch('show-success', 'Barang dihapus dari keranjang.');
         } catch (\Exception $e) {
-            Log::error('Error removing cart item: ' . $e->getMessage());
             $this->dispatch('show-error', 'Gagal menghapus barang.');
         }
     }

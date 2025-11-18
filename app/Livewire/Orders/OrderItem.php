@@ -3,7 +3,6 @@
 namespace App\Livewire\Orders;
 
 use Livewire\Component;
-use Log;
 use Livewire\Attributes\Layout;
 use App\Models\OrderItem as OrderItemModel;
 
@@ -33,7 +32,6 @@ class OrderItem extends Component
             ]);
             $this->dispatch('orderUpdated');
         } catch (\Exception $e) {
-            Log::error('Error updating order item quantity: ' . $e->getMessage());
             $this->dispatch('show-error', 'Gagal memperbarui jumlah barang.');
         }
     }
@@ -59,7 +57,6 @@ class OrderItem extends Component
             $this->dispatch('orderUpdated');
             $this->dispatch('show-success', 'Barang dihapus dari pesanan.');
         } catch (\Exception $e) {
-            Log::error('Error removing order item: ' . $e->getMessage());
             $this->dispatch('show-error', 'Gagal menghapus barang dari pesanan.');
         }
     }

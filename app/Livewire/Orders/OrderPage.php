@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Orders;
 
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\User;
-use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -22,16 +22,23 @@ class OrderPage extends Component
 
     public $total = 0;
 
-    public function mount()
+    public function mount(Order $order)
     {
-        $user = Auth::user() ?? User::find(1);
+        $user = Auth::user();
 
+        $user = Auth::user();
         if (! $user) {
-            abort(404, 'User tidak ditemukan. Untuk testing, buat User ID 1.');
+            return redirect()->route('login');
         }
 
-        // $this->addCartToOrder($user);
-        // $this->clearCart($user);
+        if ($order->user_id !== $user->id) {
+            abort(403, 'Kamu tidak memiliki akses ke order ini.');
+        }
+
+        $this->order = $order;
+
+        $this->dispatch('message', 'User Terdeteksi: '.$user->name.' (ID: '.$user->id.'), Order ID: ' . $order->id);
+
         $this->loadOrderDetails();
         $this->calculateTotals();
     }
@@ -73,19 +80,19 @@ class OrderPage extends Component
     //     }
     // }
 
-    protected function clearCart(User $user)
-    {
-        $cart = $user->cart()->with('items')->first();
+    // protected function clearCart(User $user)
+    // {
+    //     $cart = $user->cart()->with('items')->first();
 
-        if ($cart) {
-            $cart->items()->delete();
-        }
-    }
+    //     if ($cart) {
+    //         $cart->items()->delete();
+    //     }
+    // }
 
     protected function loadOrderDetails()
     {
         if ($this->order) {
-            $this->order->load(['items.product', 'items.optionValues']);
+            $this->order->load(['items.product', 'items.optionValues.customizationOption']);
         }
     }
 

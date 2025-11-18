@@ -88,7 +88,9 @@ class ProductCustomize extends Component
         if (!$user) {
             abort(500, 'Test user not found.');
         }
-        $cart = $user->cart()->firstOrCreate(['user_id' => $user->id]);
+        $cart = $user->cart()->firstOrCreate(
+            ['user_id' => $user->id]
+        );
 
         $selectedOptionIds = [];
         foreach ($this->selectedOptions as $groupId => $optionIds) {
@@ -135,12 +137,13 @@ class ProductCustomize extends Component
                 $this->dispatch('show-success', 'Barang ditambahkan ke keranjang!');
             }
 
-            return redirect()->route('cart');
-
+            
         } catch (\Exception $e) {
             Log::error('Error adding custom item to cart: ' . $e->getMessage());
             $this->dispatch('show-error', 'Gagal menambahkan barang.');
         }
+        
+        return redirect()->route('cart');
     }
 
     public function resetTopping($groupId)
