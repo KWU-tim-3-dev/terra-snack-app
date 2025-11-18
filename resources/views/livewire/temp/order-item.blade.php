@@ -27,7 +27,8 @@
                             <div class="text-gray-500">Qty: {{ $item->quantity }}</div>
                         </div>
                         <div class="text-sm font-medium">
-                            {{ currency($item->price * $item->quantity ?? 0) }}
+                            {{-- {{ currency($item->price * $item->quantity ?? 0) }} --}}
+                            40.000
                         </div>
                     </li>
                 @empty
@@ -38,19 +39,31 @@
             <div class="mt-4 border-t pt-3 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Subtotal</span>
-                    <span class="font-medium">{{ currency($order->subtotal ?? 0) }}</span>
+                    <span class="font-medium">
+                        {{-- {{ currency($order->subtotal ?? 0) }} --}}
+                            40.000
+                    </span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Shipping</span>
-                    <span class="font-medium">{{ currency($order->shipping ?? 0) }}</span>
+                    <span class="font-medium">
+                        {{-- {{ currency($order->shipping ?? 0) }} --}}
+                            40.000
+                    </span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Tax</span>
-                    <span class="font-medium">{{ currency($order->tax ?? 0) }}</span>
+                    <span class="font-medium">
+                        {{-- {{ currency($order->tax ?? 0) }} --}}
+                            40.000
+                    </span>
                 </div>
                 <div class="flex justify-between mt-2 pt-2 border-t">
                     <span class="text-lg font-semibold">Total</span>
-                    <span class="text-lg font-semibold">{{ currency($order->total ?? 0) }}</span>
+                    <span class="text-lg font-semibold">
+                        {{-- {{ currency($order->total ?? 0) }} --}}
+                            40.000
+                    </span>
                 </div>
             </div>
         </div>
@@ -127,7 +140,10 @@
                         class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-60"
                         wire:loading.attr="disabled"
                     >
-                        <span wire:loading.remove>Pay {{ currency($order->total ?? 0) }}</span>
+                        <span wire:loading.remove>Pay 
+                            40.000
+                            {{-- {{ currency($order->total ?? 0) }} --}}
+                        </span>
                         <span wire:loading>Processing...</span>
                     </button>
 

@@ -10,12 +10,14 @@ use App\Models\OrderItem as OrderItemModel;
 class OrderItem extends Component
 {
     public OrderItemModel $orderItem;
-    public int $quantity;
+    public int $quantity = 1;    
+    public float $currentTotalPrice = 0.0;
 
     public function mount(OrderItemModel $orderItem)
     {
         $this->orderItem = $orderItem;
         $this->quantity = $orderItem->quantity;
+        $this->currentTotalPrice = $orderItem->subtotal;
 
     }
 
@@ -34,6 +36,7 @@ class OrderItem extends Component
         } catch (\Exception $e) {
             $this->dispatch('show-error', 'Gagal memperbarui jumlah barang.');
         }
+        $this->currentTotalPrice = $newSubtotal;
     }
 
     public function incrementQuantity()

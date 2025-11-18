@@ -25,8 +25,7 @@ class OrderPage extends Component
     public function mount(Order $order)
     {
         $user = Auth::user();
-
-        $user = Auth::user();
+        
         if (! $user) {
             return redirect()->route('login');
         }

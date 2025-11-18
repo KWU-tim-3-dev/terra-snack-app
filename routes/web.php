@@ -8,6 +8,7 @@ use App\Livewire\History\OrderHistory;
 use App\Livewire\History\OrderHistoryPage;
 use App\Livewire\Products\ProductCustomize;
 use App\Livewire\Products\ProductList;
+use App\Livewire\Temp\OrderPaymentPage;
 use App\Livewire\Temp\UserControll;
 use Illuminate\Support\Facades\Route;
 
@@ -57,3 +58,7 @@ Route::get('/orders/history', OrderHistoryPage::class)
 Route::get('/getlogin', UserControll::class)
     ->middleware('web')
     ->name('get.login');
+
+Route::get('/payment/{order}', OrderPaymentPage::class)
+    ->middleware('web')
+    ->name('order.payment');

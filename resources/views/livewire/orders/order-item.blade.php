@@ -22,7 +22,7 @@
                 @endif
             </p>
 
-            <p class="text-base font-semibold text-gray-900 mt-1">Rp {{ number_format($orderItem->unit_price, 0, ',', '.') }}</p>
+            <p class="text-base font-semibold text-gray-900 mt-1">Rp {{ number_format($currentTotalPrice, 0, ',', '.') }}</p>
         </div>
     </div>
 

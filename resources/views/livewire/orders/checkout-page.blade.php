@@ -44,7 +44,7 @@
         <div>
             <div class="flex justify-between items-center text-xs  text-black mb-4">
                 <span class="font-bold">Total Yang Harus Dibayarkan</span>
-                <span class="text-[#8F8F8F]">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                <span class="text-[#8F8F8F]">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
             </div>
         </div>
 
