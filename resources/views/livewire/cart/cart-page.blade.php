@@ -37,7 +37,7 @@
 
         <div>
             @if ($cart && $cart->items->isNotEmpty())
-                {{-- <a href="{{ route('orders') }}" wire:navigate
+                {{-- <a href="{{ route('order') }}" wire:navigate
                     class="block w-full text-sm text-center bg-[#E13220] text-white font-semibold py-2 rounded-lg shadow-md hover:bg-red-700 transition-colors">
                     Lanjutkan Ke Pembayaran(Isi)
                 </a> --}}

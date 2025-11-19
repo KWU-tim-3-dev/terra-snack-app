@@ -24,8 +24,14 @@ class OrderHistoryPage extends Component
             ->get();
     }
 
+    public function test(Order $order)
+    {
+        $this->dispatch('message', 'Clicked order ID: '. $order->id);
+        
+    }
+
     public function render()
     {
-        return view('livewire.history.order-history-page');
+        return view('livewire.history.history-page');
     }
 }

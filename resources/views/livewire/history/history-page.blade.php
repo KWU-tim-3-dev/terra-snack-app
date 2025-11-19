@@ -3,7 +3,7 @@
     <h2 class="text-2xl font-bold mb-4 text-gray-800">Riwayat Pesanan</h2>
 
     @forelse ($orders as $order)
-        <div class="bg-white shadow-md rounded-xl p-4 mb-5 border border-gray-100">
+        <div wire:click="test({{ $order->id }})" class="bg-white shadow-md rounded-xl p-4 mb-5 border border-gray-100">
             
             {{-- Header Order --}}
             <div class="flex justify-between items-center">

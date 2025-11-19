@@ -46,7 +46,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('checkout') }}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100">
+                    <a href="{{ route('order.history') }}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100">
                         <i class="fa-solid fa-file-invoice text-[#E13220] w-6 text-center"></i>
                         <span>Riwayat Transaksi</span>
                     </a>

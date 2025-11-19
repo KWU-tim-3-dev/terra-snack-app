@@ -7,12 +7,12 @@
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-sm text-gray-500">Order #{{ $order->id ?? '—' }}</p>
-                    <p class="text-lg font-medium">{{ $order->customer_name ?? 'Customer' }}</p>
+                    <p class="text-lg font-medium">{{ $user->name ?? 'Customer' }}</p>
                     <p class="text-sm text-gray-500">{{ $order->created_at ? $order->created_at->toDayDateTimeString() : '' }}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-gray-500">Status</p>
-                    <p class="text-sm font-semibold text-indigo-600">{{ $order->status ?? 'pending' }}</p>
+                    <p class="text-sm font-semibold text-[#E13220]">{{ $order->status ?? 'pending' }}</p>
                 </div>
             </div>
         </div>
@@ -41,7 +41,8 @@
                     <span class="text-gray-600">Subtotal</span>
                     <span class="font-medium">
                         {{-- {{ currency($order->subtotal ?? 0) }} --}}
-                            40.000
+                        {{ number_format($order->subtotal, 0, ',', '.') }}
+                            {{-- 40.000 --}}
                     </span>
                 </div>
                 <div class="flex justify-between">
@@ -137,7 +138,7 @@
                 <div class="mt-6 flex items-center space-x-3">
                     <button
                         type="submit"
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-60"
+                        class="inline-flex items-center px-4 py-2 bg-[#E13220] text-white rounded hover:bg-red-700 disabled:opacity-60"
                         wire:loading.attr="disabled"
                     >
                         <span wire:loading.remove>Pay 

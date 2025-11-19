@@ -39,26 +39,22 @@ Route::get('/products/{product}/customize', ProductCustomize::class)
     ->middleware('web')
     ->name('product.customize');
 
-Route::get('/orders', OrderPage::class)
+Route::get('/order', OrderPage::class)
     ->middleware('web')
-    ->name('orders');
+    ->name('order');
 
 Route::get('/order/{order}/details', OrderPage::class)
     ->middleware('web')
     ->name('order.details');
 
-Route::get('/checkout', OrderHistory::class)
+Route::get('/order/history', OrderHistoryPage::class)
     ->middleware('web')
-    ->name('checkout');
-
-Route::get('/orders/history', OrderHistoryPage::class)
-    ->middleware('web')
-    ->name('orders.history');
+    ->name('order.history');
 
 Route::get('/getlogin', UserControll::class)
     ->middleware('web')
     ->name('get.login');
 
-Route::get('/payment/{order}', OrderPaymentPage::class)
+Route::get('/order/{order}/payment', OrderPaymentPage::class)
     ->middleware('web')
     ->name('order.payment');
