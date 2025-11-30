@@ -18,7 +18,7 @@ class CreateOrder extends CreateRecord
     {
         // Simpan items untuk diproses nanti
         $this->cachedItems = $data['items'] ?? [];
-        
+
         // Hitung total price dari semua items jika belum diisi
         if (empty($data['total_price']) && !empty($this->cachedItems)) {
             $totalPrice = 0;
@@ -74,10 +74,8 @@ class CreateOrder extends CreateRecord
     {
         $order = $this->getRecord();
 
-        // Simpan order ke property untuk diakses di modal
         $this->createdOrder = $order;
 
-        // Jika payment method QRIS atau Transfer, tampilkan modal
         if ($this->paymentMethod === 'qris') {
             $this->halt();
             $this->mountAction('confirmQrisPayment');
@@ -85,7 +83,6 @@ class CreateOrder extends CreateRecord
             $this->halt();
             $this->mountAction('confirmTransferPayment');
         } else {
-            // Redirect langsung untuk payment method lain (Cash)
             Notification::make()
                 ->title('Pesanan berhasil dibuat!')
                 ->success()
@@ -113,9 +110,8 @@ class CreateOrder extends CreateRecord
                 ->modalCancelActionLabel('Batalkan')
                 ->modalWidth('lg')
                 ->action(function () {
-                    // Update order status menjadi paid
                     $order = $this->createdOrder ?? $this->getRecord();
-                    
+
                     if ($order) {
                         $order->update([
                             'payment_status' => 'paid',
@@ -129,31 +125,64 @@ class CreateOrder extends CreateRecord
                     }
                 })
                 ->closeModalByClickingAway(false),
+
+            Action::make('confirmTransferPayment')
+                ->modalHeading('Transfer Bank untuk Pembayaran')
+                ->modalDescription(function () {
+                    $order = $this->createdOrder ?? $this->getRecord();
+                    return 'Total Pembayaran: Rp ' . number_format($order?->total_price ?? 0, 0, ',', '.');
+                })
+                ->modalContent(function () {
+                    $order = $this->createdOrder ?? $this->getRecord();
+                    return view('filament.pages.transfer-payment', [
+                        'order_id' => $order?->id ?? 0,
+                        'total' => $order?->total_price ?? 0,
+                    ]);
+                })
+                ->modalSubmitActionLabel('Sudah Transfer')
+                ->modalCancelActionLabel('Batalkan')
+                ->modalWidth('lg')
+                ->action(function () {
+                    $order = $this->createdOrder ?? $this->getRecord();
+
+                    if ($order) {
+                        $order->update([
+                            'payment_status' => 'paid',
+                            'paid_at' => now(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Pembayaran Transfer berhasil dikonfirmasi!')
+                            ->success()
+                            ->send();
+                    }
+                })
+                ->closeModalByClickingAway(false),
         ];
     }
 
     protected function generateProductName(array $item): string
     {
         $type = $item['product_type'] ?? 'Item';
-        
+
         if ($type === 'snack') {
             $parts = [ucfirst($type)];
-            
+
             if (!empty($item['vegetable']) && $item['vegetable'] !== 'none') {
                 $parts[] = ucfirst($item['vegetable']);
             }
-            
+
             if (!empty($item['topping']) && $item['topping'] !== 'none') {
                 $parts[] = ucfirst($item['topping']);
             }
-            
+
             if (!empty($item['sauce']) && $item['sauce'] !== 'none') {
                 $parts[] = ucfirst($item['sauce']);
             }
-            
+
             return implode(' - ', $parts);
         }
-        
+
         return ucfirst($type);
     }
 
