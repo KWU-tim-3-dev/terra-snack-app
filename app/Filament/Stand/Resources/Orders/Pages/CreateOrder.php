@@ -17,7 +17,8 @@ class CreateOrder extends CreateRecord
     public function mount(): void
     {
         parent::mount();
-        
+
+        // Restore draft form data when returning back from cancel, reload, etc.
         $draftData = session('order_draft_data');
         if ($draftData && is_array($draftData)) {
             $this->form->fill($draftData);
@@ -26,26 +27,30 @@ class CreateOrder extends CreateRecord
 
     public function updatedData(): void
     {
+        // Save draft automatically each time data updates
         $this->saveFormDraft();
     }
 
     public function saveFormDraft(): void
     {
         try {
+            // Save entire form as draft in session
             $formData = $this->data;
             session(['order_draft_data' => $formData]);
         } catch (\Exception $e) {
+            // Silent fail to avoid interrupting user flow
         }
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // Cache items to insert later after order is created
         $this->cachedItems = $data['items'] ?? [];
 
-        // Hitung topping fee
+        // Calculate topping fee
         $topping = $data['topping'] ?? 'none';
         $toppingFee = 0;
-        
+
         if ($topping !== 'none' && !empty($this->cachedItems)) {
             $totalItems = 0;
             foreach ($this->cachedItems as $item) {
@@ -54,10 +59,10 @@ class CreateOrder extends CreateRecord
             $toppingFee = $totalItems * 5000;
         }
 
-        // Hitung packaging fee
+        // Calculate packaging fee
         $usePackaging = $data['use_packaging'] ?? false;
         $packagingFee = 0;
-        
+
         if ($usePackaging && !empty($this->cachedItems)) {
             $totalItems = 0;
             foreach ($this->cachedItems as $item) {
@@ -66,7 +71,7 @@ class CreateOrder extends CreateRecord
             $packagingFee = $totalItems * 1000;
         }
 
-        // Hitung total price jika kosong
+        // If total price empty, calculate from items + fees
         if (empty($data['total_price']) && !empty($this->cachedItems)) {
             $totalPrice = 0;
             foreach ($this->cachedItems as $item) {
@@ -75,6 +80,7 @@ class CreateOrder extends CreateRecord
             $data['total_price'] = $totalPrice + $toppingFee + $packagingFee;
         }
 
+        // Auto-assign order metadata
         $data['user_id'] = auth()->id();
         $data['status'] = $data['status'] ?? 'pending';
         $data['payment_status'] = $data['payment_status'] ?? 'unpaid';
@@ -82,8 +88,10 @@ class CreateOrder extends CreateRecord
         $data['packaging_fee_per_item'] = $usePackaging ? 1000 : 0;
         $data['packaging_fee_total'] = $packagingFee;
 
+        // Store payment method for afterCreate() logic
         $this->paymentMethod = $data['payment_method'] ?? 'cash';
 
+        // Remove items from main insert, handled manually later
         unset($data['items']);
 
         return $data;
@@ -91,24 +99,30 @@ class CreateOrder extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
+        // Create the main order record
         $order = parent::handleRecordCreation($data);
         $this->createdOrder = $order;
 
+        // Insert order items after the order is saved
         if (!empty($this->cachedItems)) {
             $vegetable = $data['vegetable'] ?? 'none';
             $topping = $data['topping'] ?? 'none';
             $sauce = $data['sauce'] ?? 'none';
 
             foreach ($this->cachedItems as $item) {
+                // Apply global modifiers to each item
                 $item['vegetable'] = $vegetable;
                 $item['topping'] = $topping;
                 $item['sauce'] = $sauce;
 
+                // Generate readable product name for receipt
                 $productName = $this->generateProductName($item);
+
                 $unitPrice = $item['price'] ?? 0;
                 $quantity = $item['quantity'] ?? 1;
                 $subtotal = $unitPrice * $quantity;
 
+                // Insert order item record
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => null,
@@ -120,7 +134,7 @@ class CreateOrder extends CreateRecord
             }
         }
 
-        // Hapus draft setelah berhasil dibuat
+        // Clear draft after successful creation
         session()->forget('order_draft_data');
 
         return $order;
@@ -128,21 +142,25 @@ class CreateOrder extends CreateRecord
 
     protected function afterCreate(): void
     {
+        // Refresh to ensure latest values
         $order = $this->record->fresh();
         $this->createdOrder = $order;
 
+        // Handle QRIS flow
         if ($this->paymentMethod === 'qris') {
-            $this->halt();
+            $this->halt(); // prevent redirect
             $this->mountAction('confirmQrisPayment');
             return;
         }
 
+        // Handle Transfer flow
         if ($this->paymentMethod === 'transfer') {
             $this->halt();
             $this->mountAction('confirmTransferPayment');
             return;
         }
 
+        // Cash payment success
         Notification::make()
             ->title('Pesanan berhasil dibuat!')
             ->success()
@@ -152,6 +170,7 @@ class CreateOrder extends CreateRecord
     protected function getActions(): array
     {
         return [
+            // QRIS Payment Modal
             Action::make('confirmQrisPayment')
                 ->modalHeading('Scan QRIS untuk Pembayaran')
                 ->modalDescription(function () {
@@ -170,12 +189,13 @@ class CreateOrder extends CreateRecord
                     fn ($action) => $action
                         ->label('Batalkan')
                         ->action(function () {
-                            // Hapus draft ketika dibatalkan
+                            // Remove draft if user cancels payment modal
                             session()->forget('order_draft_data');
                         })
                 )
                 ->modalWidth('lg')
                 ->action(function () {
+                    // Mark order as paid
                     $order = $this->createdOrder ?? $this->getRecord();
 
                     if ($order) {
@@ -192,6 +212,7 @@ class CreateOrder extends CreateRecord
                 })
                 ->closeModalByClickingAway(false),
 
+            // Transfer Payment Modal
             Action::make('confirmTransferPayment')
                 ->modalHeading('Transfer Bank untuk Pembayaran')
                 ->modalDescription(function () {
@@ -215,6 +236,7 @@ class CreateOrder extends CreateRecord
                 )
                 ->modalWidth('lg')
                 ->action(function () {
+                    // Mark order as paid after transfer confirmation
                     $order = $this->createdOrder ?? $this->getRecord();
 
                     if ($order) {
@@ -235,6 +257,7 @@ class CreateOrder extends CreateRecord
 
     protected function generateProductName(array $item): string
     {
+        // Build readable product name for snack items
         $type = $item['product_type'] ?? 'Item';
 
         if ($type === 'snack') {
@@ -260,12 +283,14 @@ class CreateOrder extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
+        // Ensure draft removed on redirect
         session()->forget('order_draft_data');
         return $this->getResource()::getUrl('index');
     }
 
     public function getCancelFormAction(): Action
     {
+        // Override cancel: also delete draft
         return parent::getCancelFormAction()
             ->action(function () {
                 session()->forget('order_draft_data');
@@ -273,6 +298,7 @@ class CreateOrder extends CreateRecord
             });
     }
 
+    // Internal storage
     private array $cachedItems = [];
     private string $paymentMethod = 'cash';
     private ?Order $createdOrder = null;
