@@ -132,6 +132,7 @@ class OrderForm
                                         $subtotal += 20000 * $quantity;
                                     }
 
+                                    // Tambah biaya topping
                                     if ($state !== 'none') {
                                         $subtotal += $totalItems * 5000;
                                     }
@@ -177,6 +178,7 @@ class OrderForm
                                         $subtotal += 20000 * $quantity;
                                     }
 
+                                    // Tambah biaya topping
                                     if ($topping !== 'none') {
                                         $subtotal += $totalItems * 5000;
                                     }
@@ -213,7 +215,8 @@ class OrderForm
                                     $html .= '<div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Nama Pelanggan</div>';
                                     $html .= '<div class="text-2xl font-bold text-primary-700 dark:text-primary-300">' . htmlspecialchars($customerName) . '</div>';
                                     $html .= '</div>';
-
+                                    
+                                    // Customization Global
                                     $html .= '<div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">';
                                     $html .= '<div class="font-semibold text-base text-gray-800 dark:text-gray-200 mb-3">🎨 Customization</div>';
                                     $html .= '<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">';
@@ -234,6 +237,7 @@ class OrderForm
                                     $html .= '</div>';
                                     $html .= '</div></div>';
                                     
+                                    // Items List
                                     $html .= '<div>';
                                     $html .= '<div class="font-semibold text-base text-gray-800 dark:text-gray-200 mb-3">🍽️ Daftar Item</div>';
                                     $html .= '<div class="space-y-3">';
@@ -269,6 +273,7 @@ class OrderForm
                                     
                                     $html .= '</div></div>';
                                     
+                                    // Summary
                                     $usePackaging = $get('use_packaging') ?? false;
                                     $toppingFee = ($topping !== 'none') ? ($totalQty * 5000) : 0;
                                     $packagingFee = $usePackaging ? ($totalQty * 1000) : 0;
@@ -324,7 +329,31 @@ class OrderForm
                                 ->numeric()
                                 ->prefix('Rp')
                                 ->required()
-                                ->readOnly()
+                                ->disabled()
+                                ->dehydrated()
+                                ->afterStateHydrated(function ($state, callable $set, callable $get) {
+                                    $items = $get('items') ?? [];
+                                    $topping = $get('topping') ?? 'none';
+                                    $usePackaging = $get('use_packaging') ?? false;
+                                    
+                                    $totalItems = 0;
+                                    $subtotal = 0;
+
+                                    foreach ($items as $item) {
+                                        $quantity = intval($item['quantity'] ?? 1);
+                                        $totalItems += $quantity;
+                                        $subtotal += 20000 * $quantity;
+                                    }
+
+                                    if ($topping !== 'none') {
+                                        $subtotal += $totalItems * 5000;
+                                    }
+
+                                    $packagingFee = $usePackaging ? ($totalItems * 1000) : 0;
+                                    $total = $subtotal + $packagingFee;
+
+                                    $set('total_price', $total);
+                                })
                                 ->helperText('Total sudah termasuk topping dan packaging')
                                 ->columnSpanFull(),
 
