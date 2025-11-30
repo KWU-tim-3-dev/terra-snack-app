@@ -80,12 +80,13 @@ class OrderForm
 
                                     $usePackaging = $get('use_packaging') ?? false;
                                     $packagingFee = $usePackaging ? ($totalItems * 1000) : 0;
-                                    
+
                                     $set('packaging_fee_total', $packagingFee);
                                     $set('packaging_fee_per_item', $usePackaging ? 1000 : 0);
                                     $set('total_price', $total + $packagingFee);
                                 })
-                                ->itemLabel(fn (array $state): ?string => 
+                                ->itemLabel(
+                                    fn(array $state): ?string =>
                                     'Snack x' . ($state['quantity'] ?? 1) . ' = Rp ' . number_format(($state['quantity'] ?? 1) * 20000, 0, ',', '.')
                                 ),
                         ]),
@@ -200,26 +201,35 @@ class OrderForm
                                     $customerName = $get('customer_name') ?? 'Belum diisi';
                                     $items = $get('items') ?? [];
                                     $vegetable = $get('vegetable') ?? 'none';
+                                    $vegetableLabels = [
+                                        'tomato' => 'Tomat',
+                                        'cucumber' => 'Timun',
+                                        'sawi' => 'Sawi',
+                                        'none' => 'Tanpa sayur',
+                                    ];
+
+                                    $vegetableLabel = $vegetableLabels[$vegetable] ?? $vegetable;
+
                                     $topping = $get('topping') ?? 'none';
                                     $sauce = $get('sauce') ?? 'none';
-                                    
+
                                     if (empty($items)) {
                                         return 'Belum ada item yang dipilih';
                                     }
-                                    
+
                                     $html = '<div class="space-y-6">';
-                                    
+
                                     $html .= '<div class="bg-primary-50 dark:bg-primary-950 p-4 rounded-lg border-2 border-primary-200 dark:border-primary-800">';
                                     $html .= '<div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Nama Pelanggan</div>';
                                     $html .= '<div class="text-2xl font-bold text-primary-700 dark:text-primary-300">' . htmlspecialchars($customerName) . '</div>';
                                     $html .= '</div>';
-                                    
+
                                     $html .= '<div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">';
                                     $html .= '<div class="font-semibold text-base text-gray-800 dark:text-gray-200 mb-3">🎨 Customization</div>';
                                     $html .= '<div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">';
                                     $html .= '<div class="bg-white dark:bg-gray-950 p-3 rounded-lg">';
                                     $html .= '<span class="font-semibold text-gray-700 dark:text-gray-300">Sayur:</span> ';
-                                    $html .= '<span class="text-gray-900 dark:text-gray-100">' . ucfirst($vegetable !== 'none' ? $vegetable : 'Tanpa sayur') . '</span>';
+                                    $html .= '<span class="text-gray-900 dark:text-gray-100">' . $vegetableLabel . '</span>';
                                     $html .= '</div>';
                                     $html .= '<div class="bg-white dark:bg-gray-950 p-3 rounded-lg">';
                                     $html .= '<span class="font-semibold text-gray-700 dark:text-gray-300">Topping:</span> ';
@@ -233,21 +243,21 @@ class OrderForm
                                     $html .= '<span class="text-gray-900 dark:text-gray-100">' . ucfirst($sauce !== 'none' ? $sauce : 'Tanpa saus') . '</span>';
                                     $html .= '</div>';
                                     $html .= '</div></div>';
-                                    
+
                                     $html .= '<div>';
                                     $html .= '<div class="font-semibold text-base text-gray-800 dark:text-gray-200 mb-3">🍽️ Daftar Item</div>';
                                     $html .= '<div class="space-y-3">';
                                     $totalQty = 0;
                                     $subtotal = 0;
                                     $counter = 1;
-                                    
+
                                     foreach ($items as $item) {
                                         $qty = intval($item['quantity'] ?? 1);
                                         $price = 20000;
                                         $itemTotal = $qty * $price;
                                         $totalQty += $qty;
                                         $subtotal += $itemTotal;
-                                        
+
                                         $html .= '<div class="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 shadow-sm">';
                                         $html .= '<div class="flex justify-between items-center">';
                                         $html .= '<div class="flex-1">';
@@ -263,53 +273,53 @@ class OrderForm
                                         $html .= '</div>';
                                         $html .= '</div>';
                                         $html .= '</div>';
-                                        
+
                                         $counter++;
                                     }
-                                    
+
                                     $html .= '</div></div>';
-                                    
+
                                     $usePackaging = $get('use_packaging') ?? false;
                                     $toppingFee = ($topping !== 'none') ? ($totalQty * 5000) : 0;
                                     $packagingFee = $usePackaging ? ($totalQty * 1000) : 0;
                                     $grandTotal = $subtotal + $toppingFee + $packagingFee;
-                                    
+
                                     $html .= '<div class="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950 dark:to-primary-900 p-5 rounded-lg border-2 border-primary-300 dark:border-primary-700">';
                                     $html .= '<div class="font-semibold text-base text-gray-800 dark:text-gray-200 mb-4">💰 Rincian Biaya</div>';
                                     $html .= '<div class="space-y-2">';
-                                    
+
                                     $html .= '<div class="flex justify-between text-sm py-2 border-b border-primary-200 dark:border-primary-800">';
                                     $html .= '<span class="text-gray-700 dark:text-gray-300">Total Item:</span>';
                                     $html .= '<span class="font-semibold text-gray-900 dark:text-gray-100">' . $totalQty . ' pcs</span>';
                                     $html .= '</div>';
-                                    
+
                                     $html .= '<div class="flex justify-between text-sm py-2 border-b border-primary-200 dark:border-primary-800">';
                                     $html .= '<span class="text-gray-700 dark:text-gray-300">Subtotal Snack:</span>';
                                     $html .= '<span class="font-semibold text-gray-900 dark:text-gray-100">Rp ' . number_format($subtotal, 0, ',', '.') . '</span>';
                                     $html .= '</div>';
-                                    
+
                                     if ($toppingFee > 0) {
                                         $html .= '<div class="flex justify-between text-sm py-2 border-b border-primary-200 dark:border-primary-800">';
                                         $html .= '<span class="text-green-700 dark:text-green-300">Biaya Topping (' . $totalQty . ' × Rp 5.000):</span>';
                                         $html .= '<span class="font-semibold text-green-700 dark:text-green-300">Rp ' . number_format($toppingFee, 0, ',', '.') . '</span>';
                                         $html .= '</div>';
                                     }
-                                    
+
                                     if ($packagingFee > 0) {
                                         $html .= '<div class="flex justify-between text-sm py-2 border-b border-primary-200 dark:border-primary-800">';
                                         $html .= '<span class="text-blue-700 dark:text-blue-300">Biaya Packaging (' . $totalQty . ' × Rp 1.000):</span>';
                                         $html .= '<span class="font-semibold text-blue-700 dark:text-blue-300">Rp ' . number_format($packagingFee, 0, ',', '.') . '</span>';
                                         $html .= '</div>';
                                     }
-                                    
+
                                     $html .= '<div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-primary-400 dark:border-primary-600">';
                                     $html .= '<span class="text-xl font-bold text-gray-900 dark:text-gray-100">TOTAL PEMBAYARAN</span>';
                                     $html .= '<span class="text-3xl font-extrabold text-primary-600 dark:text-primary-400">Rp ' . number_format($grandTotal, 0, ',', '.') . '</span>';
                                     $html .= '</div>';
                                     $html .= '</div></div>';
-                                    
+
                                     $html .= '</div>';
-                                    
+
                                     return new HtmlString($html);
                                 })
                                 ->columnSpanFull(),
@@ -330,7 +340,7 @@ class OrderForm
                                     $items = $get('items') ?? [];
                                     $topping = $get('topping') ?? 'none';
                                     $usePackaging = $get('use_packaging') ?? false;
-                                    
+
                                     $totalItems = 0;
                                     $subtotal = 0;
 
