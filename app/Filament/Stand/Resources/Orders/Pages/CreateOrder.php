@@ -14,24 +14,73 @@ class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+        
+        $draftData = session('order_draft_data');
+        if ($draftData && is_array($draftData)) {
+            $this->form->fill($draftData);
+        }
+    }
+
+    public function updatedData(): void
+    {
+        $this->saveFormDraft();
+    }
+
+    public function saveFormDraft(): void
+    {
+        try {
+            $formData = $this->data;
+            session(['order_draft_data' => $formData]);
+        } catch (\Exception $e) {
+        }
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $this->cachedItems = $data['items'] ?? [];
 
+        // Hitung topping fee
+        $topping = $data['topping'] ?? 'none';
+        $toppingFee = 0;
+        
+        if ($topping !== 'none' && !empty($this->cachedItems)) {
+            $totalItems = 0;
+            foreach ($this->cachedItems as $item) {
+                $totalItems += intval($item['quantity'] ?? 1);
+            }
+            $toppingFee = $totalItems * 5000;
+        }
+
+        // Hitung packaging fee
+        $usePackaging = $data['use_packaging'] ?? false;
+        $packagingFee = 0;
+        
+        if ($usePackaging && !empty($this->cachedItems)) {
+            $totalItems = 0;
+            foreach ($this->cachedItems as $item) {
+                $totalItems += intval($item['quantity'] ?? 1);
+            }
+            $packagingFee = $totalItems * 1000;
+        }
+
+        // Hitung total price jika kosong
         if (empty($data['total_price']) && !empty($this->cachedItems)) {
             $totalPrice = 0;
             foreach ($this->cachedItems as $item) {
                 $totalPrice += ($item['price'] ?? 0) * ($item['quantity'] ?? 1);
             }
-            $data['total_price'] = $totalPrice;
+            $data['total_price'] = $totalPrice + $toppingFee + $packagingFee;
         }
 
         $data['user_id'] = auth()->id();
         $data['status'] = $data['status'] ?? 'pending';
         $data['payment_status'] = $data['payment_status'] ?? 'unpaid';
         $data['gross_amount'] = $data['total_price'];
-        $data['packaging_fee_per_item'] = 0;
-        $data['packaging_fee_total'] = 0;
+        $data['packaging_fee_per_item'] = $usePackaging ? 1000 : 0;
+        $data['packaging_fee_total'] = $packagingFee;
 
         $this->paymentMethod = $data['payment_method'] ?? 'cash';
 
@@ -71,6 +120,9 @@ class CreateOrder extends CreateRecord
             }
         }
 
+        // Hapus draft setelah berhasil dibuat
+        session()->forget('order_draft_data');
+
         return $order;
     }
 
@@ -97,7 +149,6 @@ class CreateOrder extends CreateRecord
             ->send();
     }
 
-
     protected function getActions(): array
     {
         return [
@@ -115,7 +166,14 @@ class CreateOrder extends CreateRecord
                     ]);
                 })
                 ->modalSubmitActionLabel('Sudah Scan & Bayar')
-                ->modalCancelActionLabel('Batalkan')
+                ->modalCancelAction(
+                    fn ($action) => $action
+                        ->label('Batalkan')
+                        ->action(function () {
+                            // Hapus draft ketika dibatalkan
+                            session()->forget('order_draft_data');
+                        })
+                )
                 ->modalWidth('lg')
                 ->action(function () {
                     $order = $this->createdOrder ?? $this->getRecord();
@@ -148,7 +206,13 @@ class CreateOrder extends CreateRecord
                     ]);
                 })
                 ->modalSubmitActionLabel('Sudah Transfer')
-                ->modalCancelActionLabel('Batalkan')
+                ->modalCancelAction(
+                    fn ($action) => $action
+                        ->label('Batalkan')
+                        ->action(function () {
+                            session()->forget('order_draft_data');
+                        })
+                )
                 ->modalWidth('lg')
                 ->action(function () {
                     $order = $this->createdOrder ?? $this->getRecord();
@@ -196,7 +260,17 @@ class CreateOrder extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
+        session()->forget('order_draft_data');
         return $this->getResource()::getUrl('index');
+    }
+
+    public function getCancelFormAction(): Action
+    {
+        return parent::getCancelFormAction()
+            ->action(function () {
+                session()->forget('order_draft_data');
+                $this->redirect($this->getResource()::getUrl('index'));
+            });
     }
 
     private array $cachedItems = [];

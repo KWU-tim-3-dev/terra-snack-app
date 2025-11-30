@@ -3,6 +3,7 @@
 namespace App\Filament\Stand\Resources\Orders\Schemas;
 
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -20,6 +21,9 @@ class OrderForm
         return $schema
             ->columns(1)
             ->components([
+                Hidden::make('_trigger_save')
+                    ->dehydrated(false),
+                
                 Wizard::make([
 
                     Step::make('Data Pelanggan')
@@ -30,7 +34,11 @@ class OrderForm
                                 ->label('Nama Pelanggan')
                                 ->placeholder('Masukkan nama pelanggan')
                                 ->required()
-                                ->maxLength(255),
+                                ->maxLength(255)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $set('_trigger_save', time());
+                                }),
                         ]),
 
                     Step::make('Pilih Produk')
@@ -78,12 +86,16 @@ class OrderForm
                                         }
                                     }
 
+                                    $topping = $get('topping') ?? 'none';
+                                    $toppingFee = ($topping !== 'none') ? ($totalItems * 5000) : 0;
+
                                     $usePackaging = $get('use_packaging') ?? false;
                                     $packagingFee = $usePackaging ? ($totalItems * 1000) : 0;
 
                                     $set('packaging_fee_total', $packagingFee);
                                     $set('packaging_fee_per_item', $usePackaging ? 1000 : 0);
-                                    $set('total_price', $total + $packagingFee);
+                                    $set('total_price', $total + $toppingFee + $packagingFee);
+                                    $set('_trigger_save', time());
                                 })
                                 ->itemLabel(
                                     fn(array $state): ?string =>
@@ -104,7 +116,12 @@ class OrderForm
                                     'none' => 'Tanpa sayur',
                                 ])
                                 ->default('none')
-                                ->required(),
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    // Trigger save
+                                    $set('_trigger_save', time());
+                                }),
                         ]),
 
                     Step::make('Pilih Topping')
@@ -142,6 +159,9 @@ class OrderForm
                                     $total = $subtotal + $packagingFee;
 
                                     $set('total_price', $total);
+                                    
+                                    // Trigger save
+                                    $set('_trigger_save', time());
                                 }),
                         ]),
 
@@ -159,7 +179,12 @@ class OrderForm
                                     'none' => 'Tanpa saus',
                                 ])
                                 ->default('none')
-                                ->required(),
+                                ->required()
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    // Trigger save
+                                    $set('_trigger_save', time());
+                                }),
 
                             Checkbox::make('use_packaging')
                                 ->label('Pakai Packaging')
@@ -188,6 +213,9 @@ class OrderForm
                                     $set('packaging_fee_per_item', $state ? 1000 : 0);
                                     $set('packaging_fee_total', $packagingFee);
                                     $set('total_price', $total);
+                                    
+                                    // Trigger save
+                                    $set('_trigger_save', time());
                                 }),
                         ]),
 
@@ -370,6 +398,11 @@ class OrderForm
                                     'transfer' => 'Transfer',
                                 ])
                                 ->required()
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    // Trigger save
+                                    $set('_trigger_save', time());
+                                })
                                 ->columnSpanFull(),
                         ])
                         ->columns(2),
