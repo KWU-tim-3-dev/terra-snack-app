@@ -16,10 +16,8 @@ class CreateOrder extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Simpan items untuk diproses nanti
         $this->cachedItems = $data['items'] ?? [];
 
-        // Hitung total price dari semua items jika belum diisi
         if (empty($data['total_price']) && !empty($this->cachedItems)) {
             $totalPrice = 0;
             foreach ($this->cachedItems as $item) {
@@ -28,7 +26,6 @@ class CreateOrder extends CreateRecord
             $data['total_price'] = $totalPrice;
         }
 
-        // Set default values untuk order
         $data['user_id'] = auth()->id();
         $data['status'] = $data['status'] ?? 'pending';
         $data['payment_status'] = $data['payment_status'] ?? 'unpaid';
@@ -36,10 +33,8 @@ class CreateOrder extends CreateRecord
         $data['packaging_fee_per_item'] = 0;
         $data['packaging_fee_total'] = 0;
 
-        // Simpan payment method untuk cek nanti
         $this->paymentMethod = $data['payment_method'] ?? 'cash';
 
-        // Hapus items dari data karena bukan field di table orders
         unset($data['items']);
 
         return $data;
@@ -48,9 +43,18 @@ class CreateOrder extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $order = parent::handleRecordCreation($data);
+        $this->createdOrder = $order;
 
         if (!empty($this->cachedItems)) {
+            $vegetable = $data['vegetable'] ?? 'none';
+            $topping = $data['topping'] ?? 'none';
+            $sauce = $data['sauce'] ?? 'none';
+
             foreach ($this->cachedItems as $item) {
+                $item['vegetable'] = $vegetable;
+                $item['topping'] = $topping;
+                $item['sauce'] = $sauce;
+
                 $productName = $this->generateProductName($item);
                 $unitPrice = $item['price'] ?? 0;
                 $quantity = $item['quantity'] ?? 1;
@@ -72,23 +76,27 @@ class CreateOrder extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $order = $this->getRecord();
-
+        $order = $this->record->fresh();
         $this->createdOrder = $order;
 
         if ($this->paymentMethod === 'qris') {
             $this->halt();
             $this->mountAction('confirmQrisPayment');
-        } elseif ($this->paymentMethod === 'transfer') {
+            return;
+        }
+
+        if ($this->paymentMethod === 'transfer') {
             $this->halt();
             $this->mountAction('confirmTransferPayment');
-        } else {
-            Notification::make()
-                ->title('Pesanan berhasil dibuat!')
-                ->success()
-                ->send();
+            return;
         }
+
+        Notification::make()
+            ->title('Pesanan berhasil dibuat!')
+            ->success()
+            ->send();
     }
+
 
     protected function getActions(): array
     {
