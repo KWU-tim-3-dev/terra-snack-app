@@ -10,47 +10,76 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * CreateOrder Page
+ * 
+ * Halaman untuk membuat order baru dengan wizard multi-step.
+ * Fitur utama:
+ * - Auto-save form data ke session saat ada perubahan
+ * - Restore form data dan step wizard saat refresh
+ * - Clear draft saat order berhasil dibuat atau dibatalkan
+ */
 class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
 
+    /**
+     * Session key untuk menyimpan draft data form
+     */
+    private const SESSION_DRAFT_KEY = 'order_draft_data';
+
+    /**
+     * Mount lifecycle hook
+     * Dipanggil saat halaman pertama kali dimuat
+     * Restore data dan step dari session jika ada
+     */
     public function mount(): void
     {
         parent::mount();
-
-        // Restore draft form data when returning back from cancel, reload, etc.
-        $draftData = session('order_draft_data');
+        
+        // Restore data form dari session
+        $draftData = session(self::SESSION_DRAFT_KEY);
         if ($draftData && is_array($draftData)) {
             $this->form->fill($draftData);
         }
     }
 
+    /**
+     * Livewire hook: dipanggil setiap kali property $data berubah
+     * Trigger auto-save ke session
+     */
     public function updatedData(): void
     {
-        // Save draft automatically each time data updates
         $this->saveFormDraft();
     }
 
+    /**
+     * Save form draft ke session
+     * Method ini dipanggil otomatis saat ada perubahan data
+     */
     public function saveFormDraft(): void
     {
         try {
-            // Save entire form as draft in session
-            $formData = $this->data;
-            session(['order_draft_data' => $formData]);
+            // Simpan form data
+            session([self::SESSION_DRAFT_KEY => $this->data]);
         } catch (\Exception $e) {
-            // Silent fail to avoid interrupting user flow
+            // Silent fail - jangan ganggu user experience
         }
     }
 
+    /**
+     * Mutate form data sebelum create order
+     * Menghitung total price, fees, dan set default values
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Cache items to insert later after order is created
+        // Cache items untuk digunakan saat create order items
         $this->cachedItems = $data['items'] ?? [];
 
-        // Calculate topping fee
+        // Hitung topping fee
         $topping = $data['topping'] ?? 'none';
         $toppingFee = 0;
-
+        
         if ($topping !== 'none' && !empty($this->cachedItems)) {
             $totalItems = 0;
             foreach ($this->cachedItems as $item) {
@@ -59,10 +88,10 @@ class CreateOrder extends CreateRecord
             $toppingFee = $totalItems * 5000;
         }
 
-        // Calculate packaging fee
+        // Hitung packaging fee
         $usePackaging = $data['use_packaging'] ?? false;
         $packagingFee = 0;
-
+        
         if ($usePackaging && !empty($this->cachedItems)) {
             $totalItems = 0;
             foreach ($this->cachedItems as $item) {
@@ -71,7 +100,7 @@ class CreateOrder extends CreateRecord
             $packagingFee = $totalItems * 1000;
         }
 
-        // If total price empty, calculate from items + fees
+        // Hitung total price jika belum ada
         if (empty($data['total_price']) && !empty($this->cachedItems)) {
             $totalPrice = 0;
             foreach ($this->cachedItems as $item) {
@@ -80,7 +109,7 @@ class CreateOrder extends CreateRecord
             $data['total_price'] = $totalPrice + $toppingFee + $packagingFee;
         }
 
-        // Auto-assign order metadata
+        // Set default values
         $data['user_id'] = auth()->id();
         $data['status'] = $data['status'] ?? 'pending';
         $data['payment_status'] = $data['payment_status'] ?? 'unpaid';
@@ -88,41 +117,44 @@ class CreateOrder extends CreateRecord
         $data['packaging_fee_per_item'] = $usePackaging ? 1000 : 0;
         $data['packaging_fee_total'] = $packagingFee;
 
-        // Store payment method for afterCreate() logic
+        // Cache payment method untuk digunakan di afterCreate
         $this->paymentMethod = $data['payment_method'] ?? 'cash';
 
-        // Remove items from main insert, handled manually later
+        // Remove items dari data karena akan disimpan terpisah
         unset($data['items']);
 
         return $data;
     }
 
+    /**
+     * Handle record creation
+     * Create order dan order items
+     */
     protected function handleRecordCreation(array $data): Model
     {
-        // Create the main order record
+        // Create order record
         $order = parent::handleRecordCreation($data);
         $this->createdOrder = $order;
 
-        // Insert order items after the order is saved
+        // Create order items
         if (!empty($this->cachedItems)) {
             $vegetable = $data['vegetable'] ?? 'none';
             $topping = $data['topping'] ?? 'none';
             $sauce = $data['sauce'] ?? 'none';
 
             foreach ($this->cachedItems as $item) {
-                // Apply global modifiers to each item
+                // Add customization to each item
                 $item['vegetable'] = $vegetable;
                 $item['topping'] = $topping;
                 $item['sauce'] = $sauce;
 
-                // Generate readable product name for receipt
+                // Generate product name dengan customization
                 $productName = $this->generateProductName($item);
-
                 $unitPrice = $item['price'] ?? 0;
                 $quantity = $item['quantity'] ?? 1;
                 $subtotal = $unitPrice * $quantity;
 
-                // Insert order item record
+                // Create order item
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => null,
@@ -134,43 +166,50 @@ class CreateOrder extends CreateRecord
             }
         }
 
-        // Clear draft after successful creation
-        session()->forget('order_draft_data');
+        // Clear draft setelah berhasil create order
+        $this->clearDraft();
 
         return $order;
     }
 
+    /**
+     * After create lifecycle hook
+     * Handle payment method dan tampilkan modal jika perlu
+     */
     protected function afterCreate(): void
     {
-        // Refresh to ensure latest values
         $order = $this->record->fresh();
         $this->createdOrder = $order;
 
-        // Handle QRIS flow
+        // Jika payment method QRIS, tampilkan modal QRIS
         if ($this->paymentMethod === 'qris') {
-            $this->halt(); // prevent redirect
+            $this->halt();
             $this->mountAction('confirmQrisPayment');
             return;
         }
 
-        // Handle Transfer flow
+        // Jika payment method Transfer, tampilkan modal Transfer
         if ($this->paymentMethod === 'transfer') {
             $this->halt();
             $this->mountAction('confirmTransferPayment');
             return;
         }
 
-        // Cash payment success
+        // Jika Cash, langsung tampilkan notifikasi sukses
         Notification::make()
             ->title('Pesanan berhasil dibuat!')
             ->success()
             ->send();
     }
 
+    /**
+     * Get page actions
+     * Define modal actions untuk QRIS dan Transfer payment
+     */
     protected function getActions(): array
     {
         return [
-            // QRIS Payment Modal
+            // Modal action untuk QRIS payment
             Action::make('confirmQrisPayment')
                 ->modalHeading('Scan QRIS untuk Pembayaran')
                 ->modalDescription(function () {
@@ -189,16 +228,16 @@ class CreateOrder extends CreateRecord
                     fn ($action) => $action
                         ->label('Batalkan')
                         ->action(function () {
-                            // Remove draft if user cancels payment modal
-                            session()->forget('order_draft_data');
+                            // Clear draft saat payment dibatalkan
+                            $this->clearDraft();
                         })
                 )
                 ->modalWidth('lg')
                 ->action(function () {
-                    // Mark order as paid
                     $order = $this->createdOrder ?? $this->getRecord();
 
                     if ($order) {
+                        // Update payment status
                         $order->update([
                             'payment_status' => 'paid',
                             'paid_at' => now(),
@@ -212,7 +251,7 @@ class CreateOrder extends CreateRecord
                 })
                 ->closeModalByClickingAway(false),
 
-            // Transfer Payment Modal
+            // Modal action untuk Transfer payment
             Action::make('confirmTransferPayment')
                 ->modalHeading('Transfer Bank untuk Pembayaran')
                 ->modalDescription(function () {
@@ -231,15 +270,16 @@ class CreateOrder extends CreateRecord
                     fn ($action) => $action
                         ->label('Batalkan')
                         ->action(function () {
-                            session()->forget('order_draft_data');
+                            // Clear draft saat payment dibatalkan
+                            $this->clearDraft();
                         })
                 )
                 ->modalWidth('lg')
                 ->action(function () {
-                    // Mark order as paid after transfer confirmation
                     $order = $this->createdOrder ?? $this->getRecord();
 
                     if ($order) {
+                        // Update payment status
                         $order->update([
                             'payment_status' => 'paid',
                             'paid_at' => now(),
@@ -255,22 +295,28 @@ class CreateOrder extends CreateRecord
         ];
     }
 
+    /**
+     * Generate product name dengan customization
+     * Format: Snack - Tomat - Mix Beef - Tar-Tar
+     */
     protected function generateProductName(array $item): string
     {
-        // Build readable product name for snack items
         $type = $item['product_type'] ?? 'Item';
 
         if ($type === 'snack') {
             $parts = [ucfirst($type)];
 
+            // Tambahkan vegetable jika ada
             if (!empty($item['vegetable']) && $item['vegetable'] !== 'none') {
                 $parts[] = ucfirst($item['vegetable']);
             }
 
+            // Tambahkan topping jika ada
             if (!empty($item['topping']) && $item['topping'] !== 'none') {
                 $parts[] = ucfirst($item['topping']);
             }
 
+            // Tambahkan sauce jika ada
             if (!empty($item['sauce']) && $item['sauce'] !== 'none') {
                 $parts[] = ucfirst($item['sauce']);
             }
@@ -281,25 +327,57 @@ class CreateOrder extends CreateRecord
         return ucfirst($type);
     }
 
+    /**
+     * Get redirect URL after create
+     * Redirect ke index page dan clear draft
+     */
     protected function getRedirectUrl(): string
     {
-        // Ensure draft removed on redirect
-        session()->forget('order_draft_data');
+        // Clear draft setelah redirect
+        $this->clearDraft();
         return $this->getResource()::getUrl('index');
     }
 
+    /**
+     * Override cancel form action
+     * Clear draft saat tombol Batal diklik
+     */
     public function getCancelFormAction(): Action
     {
-        // Override cancel: also delete draft
         return parent::getCancelFormAction()
             ->action(function () {
-                session()->forget('order_draft_data');
+                // Clear draft saat cancel
+                $this->clearDraft();
                 $this->redirect($this->getResource()::getUrl('index'));
             });
     }
 
-    // Internal storage
+    /**
+     * Clear draft data dari session dan localStorage
+     * Method ini dipanggil saat:
+     * - Order berhasil dibuat
+     * - User klik tombol Batal
+     * - Payment dibatalkan
+     */
+    private function clearDraft(): void
+    {
+        session()->forget([
+            self::SESSION_DRAFT_KEY,
+        ]);
+    }
+
+    /**
+     * Cached items untuk digunakan saat create order items
+     */
     private array $cachedItems = [];
+    
+    /**
+     * Payment method yang dipilih user
+     */
     private string $paymentMethod = 'cash';
+    
+    /**
+     * Created order instance
+     */
     private ?Order $createdOrder = null;
 }
