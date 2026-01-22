@@ -9,47 +9,72 @@ use Illuminate\Support\Str;
 
 class CustomizationOptionSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        $customizationData = [
-            ['name' => 'Tomato', 'type' => 'sayur', 'price' => 0, 'image' => 'images/custom/sayur/tomato.png'],
-            ['name' => 'Timun', 'type' => 'sayur', 'price' => 0, 'image' => 'images/custom/sayur/timun.png'],
-            ['name' => 'Sawi', 'type' => 'sayur', 'price' => 0, 'image' => 'images/custom/sayur/sawi.png'],
+        $sayurGroup = CustomizationOption::create([
+            'name' => 'Sayur',
+            'slug' => Str::slug('Sayur'),
+            'type' => 'checkbox', // multiple selection
+        ]);
 
-            ['name' => 'Mix Beef', 'type' => 'topping', 'price' => 0, 'image' => 'images/custom/topping/mix-beef.png'],
-            ['name' => 'Mix Chicken', 'type' => 'topping', 'price' => 0, 'image' => 'images/custom/topping/mix-chicken.png'],
-            ['name' => 'Mix Beef & Chicken', 'type' => 'topping', 'price' => 0, 'image' => 'images/custom/topping/mix-beef-chicken.png'],
-
-            ['name' => 'Tar-Tar', 'type' => 'saus', 'price' => 0, 'image' => 'images/custom/saus/tar-tar.png'],
-            ['name' => 'Marinara', 'type' => 'saus', 'price' => 0, 'image' => 'images/custom/saus/marinara.png'],
-            ['name' => 'Cheese', 'type' => 'saus', 'price' => 0, 'image' => 'images/custom/saus/cheese.png'],
-            ['name' => 'Mixed', 'type' => 'saus', 'price' => 0, 'image' => 'images/custom/saus/mixed.png'],
+        $sayurValues = [
+            ['name' => 'Tomato', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Timun', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Sawi', 'price_modifier' => 0, 'details' => []],
         ];
 
-        $this->seedCustomization($customizationData);
+        foreach ($sayurValues as $value) {
+            $sayurGroup->optionValues()->create([
+                'name' => $value['name'],
+                'slug' => Str::slug($value['name']),
+                'price_modifier' => $value['price_modifier'],
+                'details' => $value['details'],
+            ]);
+        }
 
-        $this->command->info('✅ Customization Options seeded successfully!');
-    }
+        // 2. Topping group
+        $toppingGroup = CustomizationOption::create([
+            'name' => 'Topping',
+            'slug' => Str::slug('Topping'),
+            'type' => 'checkbox', // multiple selection
+        ]);
 
-    private function seedCustomization(array $data): void
-    {
-        $order = 1;
+        $toppingValues = [
+            ['name' => 'Mix Beef', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Mix Chicken', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Mix Beef & Chicken', 'price_modifier' => 0, 'details' => []],
+        ];
 
-        foreach ($data as $item) {
-            CustomizationOption::firstOrCreate(
-                [
-                    'name' => $item['name'],
-                    'type' => $item['type'],
-                ],
-                [
-                    'slug' => Str::slug($item['name']),
-                    'order' => $order++,
-                    'is_required' => false, 
-                    'multiple_selection' => false, 
-                ]
-            );
+        foreach ($toppingValues as $value) {
+            $toppingGroup->optionValues()->create([
+                'name' => $value['name'],
+                'slug' => Str::slug($value['name']),
+                'price_modifier' => $value['price_modifier'],
+                'details' => $value['details'],
+            ]);
+        }
 
-            $this->command->info(" > Seeded: {$item['name']} ({$item['type']})");
+        // 3. Sauce group
+        $sausGroup = CustomizationOption::create([
+            'name' => 'Saus',
+            'slug' => Str::slug('Saus'),
+            'type' => 'radio', // single selection
+        ]);
+
+        $sausValues = [
+            ['name' => 'Tar-Tar', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Marinara', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Cheese', 'price_modifier' => 0, 'details' => []],
+            ['name' => 'Mixed', 'price_modifier' => 0, 'details' => []],
+        ];
+
+        foreach ($sausValues as $value) {
+            $sausGroup->optionValues()->create([
+                'name' => $value['name'],
+                'slug' => Str::slug($value['name']),
+                'price_modifier' => $value['price_modifier'],
+                'details' => $value['details'],
+            ]);
         }
     }
 }

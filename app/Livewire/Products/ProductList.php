@@ -26,11 +26,18 @@ class ProductList extends Component
 
     public function render()
     {
-        $products = Product::where('category_id', $this->activeCategoryId)
+        $products = Product::with('customizationOptions') 
+            ->where('category_id', $this->activeCategoryId)
             ->get();
+
         return view('livewire.products.product-list', [
             'products' => $products
         ]);
+        // $products = Product::where('category_id', $this->activeCategoryId)
+        //     ->get();
+        // return view('livewire.products.product-list', [
+        //     'products' => $products
+        // ]);
     }
 }
 

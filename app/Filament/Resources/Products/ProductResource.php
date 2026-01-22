@@ -54,6 +54,9 @@ class ProductResource extends Resource
                     ->default(null)
                     ->columnSpanFull(),
                 FileUpload::make('image_url')
+                    ->disk('public')   
+                    ->directory('products')
+                    ->image()
 
             ]);
     }
@@ -74,7 +77,7 @@ class ProductResource extends Resource
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('image_url')
                     ->label('Gambar')
-                    ->size(70) 
+                    ->size(70)
                     ->extraImgAttributes(['class' => 'object-cover']),
                 TextColumn::make('created_at')
                     ->dateTime()

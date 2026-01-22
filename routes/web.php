@@ -20,10 +20,10 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'customer'])->group(function () {
 
-
     Route::get('/cart', CartPage::class)->name('cart');
     Route::get('/products', ProductList::class)->name('products.list');
-    Route::get('/products/{product}/customize', ProductCustomize::class)->name('product.customize');
+    Route::get('/products/{product:slug}/customize', ProductCustomize::class)
+        ->name('product.customize');
     Route::get('/checkout', CheckoutPage::class)->name('checkout');
     Route::get('/history/{order}/upload-proof', UploadPaymentProof::class)->name('customer-history.upload-proof');
     Route::get('/history', CustomerHistoryPage::class)->name('customer-history.list');

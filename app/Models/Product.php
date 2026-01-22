@@ -10,7 +10,7 @@ use App\Traits\HasSlug;
 
 class Product extends Model
 {
-     use HasSlug;
+    use HasSlug;
     protected $fillable = [
         'category_id',
         'name',
@@ -31,13 +31,18 @@ class Product extends Model
 
     public function customizationOptions(): BelongsToMany
     {
-        return $this->belongsToMany(CustomizationOption::class, 'product_customizable_options');
+        return $this->belongsToMany(CustomizationOption::class, 'product_customization_options');
 
     }
 
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 
 }

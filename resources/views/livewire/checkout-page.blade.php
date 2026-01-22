@@ -1,4 +1,4 @@
-<div>
+{{-- <div>
         <div class="mt-5 mb-8">
             <div class="flex items-center justify-center gap-4">
                 <span class="text-2xl text-[#E13220]">
@@ -149,6 +149,171 @@
                 <i class="fa-solid fa-circle-notch animate-spin text-3xl"></i>
             </div>
         @endif
+</div> --}}
+
+<div class="min-h-screen pb-48 bg-[#FFFBEB]"
+    style="background-image: radial-gradient(#F8B418 2px, transparent 2px); background-size: 24px 24px;">
+
+    {{-- Header --}}
+    <div class="pt-8 px-5 mb-8 text-center">
+        <div class="inline-flex items-center justify-center gap-3 bg-white px-6 py-3 rounded-full border-4 border-[#F8B418] shadow-[4px_4px_0px_0px_#F8B418]">
+            <i class="fa-solid fa-cash-register text-3xl text-[#E13220]"></i>
+            <h1 class="text-3xl font-black text-gray-800 uppercase tracking-wide">
+                Checkout
+            </h1>
+        </div>
+    </div>
+
+    @if ($order)
+        <div class="px-5 space-y-6 max-w-lg mx-auto">
+
+            {{-- Location Card --}}
+            <div class="bg-white p-5 rounded-[2rem] border-4 border-[#F8B418] shadow-[6px_6px_0px_0px_#F8B418]">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 bg-[#FFF8E1] rounded-full border-2 border-[#F8B418] flex items-center justify-center text-[#E13220] text-xl shrink-0">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-black text-gray-800 text-lg uppercase mb-1">Lokasi Ambil</h2>
+                        <p class="text-sm font-bold text-gray-500 leading-relaxed">
+                            Jl. Ketintang No.156, Ketintang,<br> Kec. Gayungan, Surabaya
+                        </p>
+                    </div>
+                </div>
+                <a href="https://maps.google.com/?q=Jl.+Ketintang+No.156,+Ketintang,+Surabaya" target="_blank"
+                    class="mt-4 flex items-center justify-center gap-2 w-full bg-[#F8B418] text-white py-3 rounded-xl font-black text-sm border-b-4 border-[#d39200] hover:bg-[#ffc12e] active:border-b-0 active:translate-y-1 transition-all">
+                    <i class="fa-solid fa-map"></i> BUKA PETA
+                </a>
+            </div>
+
+            {{-- Order Items --}}
+            <div class="space-y-4">
+                <h3 class="ml-2 font-black text-gray-400 uppercase tracking-wider text-sm">Pesanan Kamu</h3>
+                
+                @foreach($order->items as $item)
+                    <div class="bg-white p-4 rounded-[1.5rem] border-4 border-gray-100 shadow-sm flex gap-4 items-center">
+                        {{-- Image --}}
+                        <div class="w-20 h-20 bg-gray-100 rounded-xl border-2 border-gray-200 overflow-hidden shrink-0">
+                            <img src="{{ $item->product->image_url ?? asset('assets/snack-placeholder.png') }}"
+                                 class="w-full h-full object-cover">
+                        </div>
+
+                        {{-- Details --}}
+                        <div class="flex-1">
+                            <h3 class="font-black text-gray-800 leading-tight mb-1">{{ $item->product_name }}</h3>
+                            
+                            @if($item->optionValues && $item->optionValues->count() > 0)
+                                <div class="flex flex-wrap gap-1 mb-2">
+                                    @foreach($item->optionValues as $option)
+                                        <span class="px-2 py-0.5 bg-[#FFF8E1] text-[#F8B418] text-[10px] font-bold rounded uppercase">
+                                            {{ $option->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="flex justify-between items-end">
+                                <span class="text-xs font-bold text-gray-400">x{{ $item->quantity }}</span>
+                                <span class="font-black text-gray-800">Rp {{ number_format($item->unit_price, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Payment Summary --}}
+            <div class="bg-white p-6 rounded-[2rem] border-4 border-[#E13220] shadow-[6px_6px_0px_0px_#E13220] relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E13220] text-white px-4 py-1 rounded-full font-black text-xs uppercase tracking-widest border-2 border-white shadow-sm">
+                    Ringkasan
+                </div>
+
+                <div class="space-y-2 mt-2">
+                    <div class="flex justify-between text-sm font-bold text-gray-500">
+                        <span>Subtotal</span>
+                        <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold text-gray-500">
+                        <span>Biaya Packaging</span>
+                        <span>Rp {{ number_format($packagingFeeTotal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="border-t-2 border-dashed border-gray-200 my-3 pt-3 flex justify-between font-black text-gray-800 text-xl">
+                        <span>Total Bayar</span>
+                        <span class="text-[#E13220]">Rp {{ number_format($totalPrice, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Integrated Payment Upload (If Unpaid) --}}
+            @if($order->payment_status == 'unpaid')
+                <div class="bg-[#FFF8E1] p-6 rounded-[2rem] border-4 border-[#F8B418] border-dashed text-center">
+                    <h3 class="font-black text-gray-800 mb-4 uppercase">Pembayaran (QRIS)</h3>
+
+                    <div class="bg-white p-3 rounded-2xl border-2 border-[#F8B418] inline-block mb-4 shadow-sm">
+                        <img src="{{ asset('assets/qris.jpeg') }}" alt="QRIS" class="h-40 object-contain rounded-lg">
+                    </div>
+
+                    <form class="space-y-3">
+                        <label class="block w-full cursor-pointer">
+                            <input type="file" wire:model="paymentProof" accept="image/*" class="hidden">
+                            <div class="bg-white border-4 border-dashed border-[#F8B418] rounded-xl p-4 hover:bg-[#FFFBEB] transition-colors relative">
+                                @if ($paymentProof)
+                                    <img src="{{ $paymentProof->temporaryUrl() }}" class="h-24 mx-auto object-cover rounded-lg">
+                                    <div class="mt-2 text-xs font-black text-green-500 uppercase">
+                                        <i class="fa-solid fa-check-circle"></i> File Oke!
+                                    </div>
+                                @else
+                                    <i class="fa-solid fa-camera text-2xl text-[#F8B418] mb-1"></i>
+                                    <p class="text-xs font-bold text-gray-400 uppercase">Upload Bukti</p>
+                                @endif
+                            </div>
+                        </label>
+                        @error('paymentProof') 
+                            <span class="text-[#E13220] text-xs font-bold block">{{ $message }}</span> 
+                        @enderror
+                    </form>
+                </div>
+            @endif
+
+        </div>
+
+        {{-- Sticky Footer --}}
+        <div class="fixed bottom-0 left-0 right-0 z-50 w-full max-w-md mx-auto">
+            <div class="bg-white/95 backdrop-blur-sm border-t-4 border-[#F8B418] rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] p-6 pb-8">
+                
+                @if($order->payment_status == 'unpaid')
+                    <div class="flex justify-between items-end mb-4 px-2">
+                        <span class="text-gray-500 font-bold text-sm uppercase">Total</span>
+                        <span class="text-3xl font-black text-[#E13220]">
+                            Rp {{ number_format($totalPrice, 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                    <button type="button" wire:click="uploadPaymentProof" wire:loading.attr="disabled"
+                        class="w-full bg-[#E13220] text-white text-xl font-black py-4 rounded-2xl border-b-8 border-[#9a2316] shadow-xl hover:bg-[#ff402c] hover:-translate-y-1 active:border-b-0 active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="uploadPaymentProof">
+                            <i class="fa-solid fa-check"></i> KONFIRMASI BAYAR
+                        </span>
+                        <span wire:loading wire:target="uploadPaymentProof">
+                            <i class="fa-solid fa-spinner animate-spin"></i> PROSES...
+                        </span>
+                    </button>
+                @else
+                    <div class="text-center">
+                        <div class="inline-block bg-green-100 text-green-600 px-6 py-2 rounded-full font-black text-sm uppercase mb-2">
+                            <i class="fa-solid fa-check-circle mr-1"></i> Pembayaran Berhasil
+                        </div>
+                        <p class="text-xs font-bold text-gray-400">Menunggu konfirmasi admin dapur.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+    @else
+        <div class="flex flex-col items-center justify-center h-[50vh] text-[#F8B418]">
+            <i class="fa-solid fa-circle-notch animate-spin text-5xl mb-4"></i>
+            <p class="font-black text-xl uppercase">Menyiapkan Dapur...</p>
+        </div>
+    @endif
 </div>
 
 <script>

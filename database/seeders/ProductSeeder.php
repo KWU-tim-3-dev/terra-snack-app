@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\CustomizationOption;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -61,15 +62,27 @@ class ProductSeeder extends Seeder
             ]
         ];
 
-        $allProducts = array_merge( $snackProducts);
+        $allProducts = array_merge($snackProducts);
+        $allOptionIds = CustomizationOption::all()->pluck('id')->toArray();
 
-        foreach ($allProducts as $product) {
-            Product::firstOrCreate(
-                ['slug' => Str::slug($product['name'])],
-                array_merge($product, [
-                    'slug' => Str::slug($product['name']),
+        if (empty($allOptionIds)) {
+            $this->command->error('⚠️ Warning: No Customization Options found. Did CustomizationOptionSeeder run?');
+        }
+
+        $allProducts = $snackProducts;
+
+        foreach ($allProducts as $productData) {
+
+            $product = Product::firstOrCreate(
+                ['slug' => Str::slug($productData['name'])],
+                array_merge($productData, [
+                    'slug' => Str::slug($productData['name']),
                 ])
             );
+
+            if ($product->category_id === $snackCategory->id && !empty($allOptionIds)) {
+                $product->customizationOptions()->sync($allOptionIds);
+            }
         }
 
         $this->command->info('✅ All food and drink products seeded successfully!');
